@@ -11,6 +11,13 @@ export const env = {
   tonJettonMaster: process.env.TON_JETTON_MASTER || '',
   tonJettonDecimals: parseInt(process.env.TON_JETTON_DECIMALS || '9', 10),
   tonapiKey: process.env.TONAPI_KEY || '',
+  jettonTokens: (() => {
+    try {
+      return JSON.parse(process.env.JETTON_TOKENS || '[]');
+    } catch {
+      return [];
+    }
+  })(),
   allowedOrigin: process.env.ALLOWED_ORIGIN || '*',
   adminApiKey: process.env.ADMIN_API_KEY || 'change-me',
   wsSecret: process.env.WS_SECRET || 'ws-secret',

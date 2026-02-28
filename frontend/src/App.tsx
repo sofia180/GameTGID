@@ -14,7 +14,9 @@ import {
   adminCompleteTournament,
   walletLink,
   adminParticipants as fetchAdminParticipants,
-  adminMatches as fetchAdminMatches
+  adminMatches as fetchAdminMatches,
+  createRoom,
+  getRoom
 } from './api';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 
@@ -32,13 +34,15 @@ function App() {
   const [selected, setSelected] = useState<number | null>(null);
   const [board, setBoard] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [paymentInfo, setPaymentInfo] = useState<{ memo: string; wallet: string; amount: number } | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<{ memo: string; wallet: string; amount: number; token?: string } | null>(null);
   const [walletUrls, setWalletUrls] = useState<{ tonTransferUrl: string; telegramWalletUrl: string } | null>(null);
   const [fromAddress, setFromAddress] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0, game_type: 'arcade' });
   const [adminParticipants, setAdminParticipants] = useState<any[]>([]);
   const [adminMatches, setAdminMatches] = useState<any[]>([]);
+  const [token, setToken] = useState('TON');
+  const [rooms, setRooms] = useState<Record<number, any>>({});
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
@@ -96,15 +100,15 @@ function App() {
     setLoading(true);
     try {
       if (t.entry_fee > 0) {
-        const intent = await createPaymentIntent(t.id);
+        const intent = await createPaymentIntent(t.id, token);
         setPaymentInfo(intent);
-        const wl = await walletLink(t.id);
+        const wl = await walletLink(t.id, token);
         setWalletUrls({ tonTransferUrl: wl.tonTransferUrl, telegramWalletUrl: wl.telegramWalletUrl });
         setSelected(t.id);
         if (!tonAddress) {
           alert('Подключите TON кошелёк через кнопку в шапке');
         }
-        alert(`Отправьте ${intent.amount} TON на ${intent.wallet} с комментарием ${intent.memo}, затем подтвердите оплату.`);
+        alert(`Отправьте ${intent.amount} ${token} на ${intent.wallet} с комментарием ${intent.memo}, затем подтвердите оплату.`);
       } else {
         await joinTournament(t.id, {});
         await loadLeaderboard(t.id);
@@ -121,11 +125,20 @@ function App() {
     if (!selected || !paymentInfo) return;
     setLoading(true);
     try {
-      const amountNano = BigInt(Math.ceil(paymentInfo.amount * 1e9)).toString();
-      await verifyPayment({ memo: paymentInfo.memo, fromAddress, amountNano });
+      if ((paymentInfo.token || token) === 'TON') {
+        const amountNano = BigInt(Math.ceil(paymentInfo.amount * 1e9)).toString();
+        await verifyPayment({ memo: paymentInfo.memo, fromAddress, amountNano, token: 'TON' });
+      } else {
+        const status = await verifyPayment({ memo: paymentInfo.memo, token });
+        if (status.status !== 'confirmed') {
+          alert('Оплата еще не подтвердилась, попробуйте через пару секунд');
+          return;
+        }
+      }
       await joinTournament(selected, {});
       await loadLeaderboard(selected);
       setPaymentInfo(null);
+      setWalletUrls(null);
       setFromAddress('');
     } catch (err) {
       console.error(err);
@@ -164,10 +177,24 @@ function App() {
   async function loadAdminData(id: number) {
     if (!adminKey) return;
     try {
-      const [p, m] = await Promise.all([adminParticipants(id, adminKey), adminMatches(id, adminKey)]);
+      const [p, m] = await Promise.all([fetchAdminParticipants(id, adminKey), fetchAdminMatches(id, adminKey)]);
       setAdminParticipants(p);
       setAdminMatches(m);
     } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleCreateRoom(matchId: number) {
+    if (!adminKey) {
+      alert('Admin key required');
+      return;
+    }
+    try {
+      const room = await createRoom(matchId, adminKey);
+      setRooms((prev) => ({ ...prev, [matchId]: room }));
+    } catch (err) {
+      alert('Не удалось создать комнату');
       console.error(err);
     }
   }
@@ -190,6 +217,18 @@ function App() {
 
       <section>
         <h2 className="text-lg font-semibold mb-2">Tournaments</h2>
+        <div className="flex gap-2 text-sm mb-2">
+          <span className="text-slate-400">Token:</span>
+          {['TON', 'USDT', 'USDC'].map((sym) => (
+            <button
+              key={sym}
+              onClick={() => setToken(sym)}
+              className={`px-2 py-1 rounded ${token === sym ? 'bg-emerald-500 text-black' : 'bg-slate-700 text-white'}`}
+            >
+              {sym}
+            </button>
+          ))}
+        </div>
         <div className="space-y-2">
           {tournaments.map((t) => (
             <div key={t.id} className="rounded-lg bg-slate-800 p-3 flex justify-between items-center">
@@ -342,8 +381,21 @@ function App() {
             <div className="font-semibold">Matches ({adminMatches.length})</div>
             {adminMatches.map((m) => (
               <div key={m.id} className="flex justify-between border-b border-slate-700 py-1">
-                <span>#{m.id} {m.game_type}</span>
-                <span className="text-slate-400">p1:{m.player1} p2:{m.player2} winner:{m.winner || '-'}</span>
+                <div className="space-y-1">
+                  <span>#{m.id} {m.game_type}</span>
+                  <div className="text-slate-400">p1:{m.player1} p2:{m.player2} winner:{m.winner || '-'}</div>
+                  {rooms[m.id] && (
+                    <div className="text-xs text-emerald-300">Room code: {rooms[m.id].code} · pass: {rooms[m.id].password}</div>
+                  )}
+                </div>
+                <div className="flex gap-2 items-center">
+                  <button className="bg-slate-600 text-white px-2 rounded" onClick={() => loadAdminData(selected || m.tournament_id)}>
+                    Refresh
+                  </button>
+                  <button className="bg-indigo-500 text-black px-2 rounded" onClick={() => handleCreateRoom(m.id)}>
+                    Create room
+                  </button>
+                </div>
               </div>
             ))}
           </div>

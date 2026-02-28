@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS payments (
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
   amount NUMERIC NOT NULL,
+  token_symbol TEXT DEFAULT 'TON',
   memo TEXT UNIQUE NOT NULL,
   from_address TEXT,
   tx_hash TEXT,
@@ -47,3 +48,13 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 CREATE INDEX IF NOT EXISTS payments_user_tournament_idx ON payments(user_id, tournament_id);
+
+CREATE TABLE IF NOT EXISTS rooms (
+  id SERIAL PRIMARY KEY,
+  match_id INTEGER REFERENCES matches(id) ON DELETE CASCADE,
+  code TEXT UNIQUE NOT NULL,
+  password TEXT,
+  status TEXT DEFAULT 'open',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ
+);

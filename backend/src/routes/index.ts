@@ -12,8 +12,9 @@ import {
   matchesHandler
 } from '../controllers/tournamentController.js';
 import { leaderboard, reportMatch } from '../controllers/matchController.js';
-import { paymentIntent, paymentVerify, walletLink } from '../controllers/paymentController.js';
+import { paymentIntent, paymentVerify, walletLink, paymentStatus } from '../controllers/paymentController.js';
 import { listParticipantsAdmin, listMatchesAdmin } from '../controllers/adminController.js';
+import { createRoom, getRoom } from '../controllers/roomController.js';
 
 const router = Router();
 
@@ -33,9 +34,12 @@ router.get('/admin/tournaments/:id/participants', adminAuth, listParticipantsAdm
 router.get('/admin/tournaments/:id/matches', adminAuth, listMatchesAdmin);
 
 router.post('/matches/:id/report', adminAuth, reportMatch);
+router.post('/matches/:id/room', adminAuth, createRoom);
+router.get('/matches/:id/room', getRoom);
 
 router.post('/payments/intent', telegramAuth, paymentIntent);
 router.post('/payments/verify', telegramAuth, paymentVerify);
 router.get('/payments/wallet-link', telegramAuth, walletLink);
+router.get('/payments/status', telegramAuth, paymentStatus);
 
 export default router;

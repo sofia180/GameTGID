@@ -10,12 +10,12 @@ export interface PaymentCheck {
   memo?: string;
 }
 
-export async function createPaymentIntent(userId: number, tournamentId: number, amount: number): Promise<Payment> {
+export async function createPaymentIntent(userId: number, tournamentId: number, amount: number, tokenSymbol: string = 'TON'): Promise<Payment> {
   const memo = `tt-${randomUUID()}`;
   const { rows } = await pool.query(
-    `INSERT INTO payments (user_id, tournament_id, amount, memo, status)
-     VALUES ($1,$2,$3,$4,'pending') RETURNING *`,
-    [userId, tournamentId, amount, memo]
+    `INSERT INTO payments (user_id, tournament_id, amount, memo, status, token_symbol)
+     VALUES ($1,$2,$3,$4,'pending',$5) RETURNING *`,
+    [userId, tournamentId, amount, memo, tokenSymbol]
   );
   return rows[0];
 }

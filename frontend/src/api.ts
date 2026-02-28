@@ -29,19 +29,24 @@ export async function joinTournament(id: number, payload: any) {
   return data;
 }
 
-export async function createPaymentIntent(tournamentId: number) {
-  const { data } = await api.post('/payments/intent', { tournamentId });
-  return data as { memo: string; amount: number; wallet: string };
+export async function createPaymentIntent(tournamentId: number, token: string) {
+  const { data } = await api.post('/payments/intent', { tournamentId, token });
+  return data as { memo: string; amount: number; wallet: string; token: string };
 }
 
-export async function verifyPayment(body: { memo: string; fromAddress: string; amountNano: string }) {
+export async function verifyPayment(body: { memo: string; fromAddress?: string; amountNano?: string; token?: string }) {
   const { data } = await api.post('/payments/verify', body);
   return data;
 }
 
-export async function walletLink(tournamentId: number) {
-  const { data } = await api.get('/payments/wallet-link', { params: { tournamentId } });
-  return data as { memo: string; amount: number; tonTransferUrl: string; telegramWalletUrl: string };
+export async function walletLink(tournamentId: number, token: string) {
+  const { data } = await api.get('/payments/wallet-link', { params: { tournamentId, token } });
+  return data as { memo: string; amount: number; tonTransferUrl: string; telegramWalletUrl: string; token: string };
+}
+
+export async function paymentStatus(memo: string) {
+  const { data } = await api.get('/payments/status', { params: { memo } });
+  return data as { status: string; payment: any };
 }
 
 export async function leaderboard(id: number) {
@@ -72,6 +77,16 @@ export async function adminStartTournament(id: number, adminKey: string) {
 export async function adminCompleteTournament(id: number, adminKey: string) {
   const { data } = await api.post(`/tournaments/${id}/complete`, {}, { headers: { 'x-admin-key': adminKey } });
   return data;
+}
+
+export async function getRoom(matchId: number) {
+  const { data } = await api.get(`/matches/${matchId}/room`);
+  return data.room;
+}
+
+export async function createRoom(matchId: number, adminKey: string) {
+  const { data } = await api.post(`/matches/${matchId}/room`, {}, { headers: { 'x-admin-key': adminKey } });
+  return data.room;
 }
 
 export default api;

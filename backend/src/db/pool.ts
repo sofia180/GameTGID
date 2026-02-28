@@ -46,6 +46,7 @@ export async function migrate() {
       user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
       amount NUMERIC NOT NULL,
+      token_symbol TEXT DEFAULT 'TON',
       memo TEXT UNIQUE NOT NULL,
       from_address TEXT,
       tx_hash TEXT,
@@ -54,6 +55,15 @@ export async function migrate() {
       confirmed_at TIMESTAMPTZ
     );
     CREATE INDEX IF NOT EXISTS payments_user_tournament_idx ON payments(user_id, tournament_id);
+    CREATE TABLE IF NOT EXISTS rooms (
+      id SERIAL PRIMARY KEY,
+      match_id INTEGER REFERENCES matches(id) ON DELETE CASCADE,
+      code TEXT UNIQUE NOT NULL,
+      password TEXT,
+      status TEXT DEFAULT 'open',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      expires_at TIMESTAMPTZ
+    );
   `);
 
   // Add columns if missing (idempotent)
@@ -64,6 +74,9 @@ export async function migrate() {
       END IF;
       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='matches' AND column_name='game_type') THEN
         ALTER TABLE matches ADD COLUMN game_type TEXT DEFAULT 'arcade';
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='token_symbol') THEN
+        ALTER TABLE payments ADD COLUMN token_symbol TEXT DEFAULT 'TON';
       END IF;
     END$$;`);
 }

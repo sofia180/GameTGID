@@ -9,7 +9,7 @@ const createSchema = z.object({
   title: z.string().min(3),
   entry_fee: z.number().nonnegative(),
   prize_pool: z.number().nonnegative(),
-  game_type: z.enum(['chess', 'checkers', 'arcade']).default('arcade')
+  game_type: z.enum(['chess', 'checkers', 'arcade', 'dota2', 'csgo']).default('arcade')
 });
 
 export async function getTournaments(_req: Request, res: Response) {

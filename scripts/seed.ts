@@ -6,7 +6,11 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function main() {
 await pool.query(`INSERT INTO tournaments (title, entry_fee, prize_pool, status, game_type)
-    VALUES ('Demo Cup', 0, 5, 'active', 'arcade'), ('TON Chess Open', 1.5, 15, 'pending', 'chess'), ('Checkers Blitz', 0.5, 5, 'pending', 'checkers')
+    VALUES ('Demo Cup', 0, 5, 'active', 'arcade'),
+           ('TON Chess Open', 1.5, 15, 'pending', 'chess'),
+           ('Checkers Blitz', 0.5, 5, 'pending', 'checkers'),
+           ('Dota 2 Cup', 2, 25, 'pending', 'dota2'),
+           ('CS:GO Clash', 2, 25, 'pending', 'csgo')
     ON CONFLICT DO NOTHING;`);
   console.log('Seeded tournaments');
   await pool.end();

@@ -1,7 +1,7 @@
 export type TournamentStatus = 'pending' | 'active' | 'completed' | 'cancelled';
 export type MatchStatus = 'pending' | 'in_progress' | 'completed';
 export type PaymentStatus = 'pending' | 'confirmed' | 'failed';
-export type GameType = 'chess' | 'checkers' | 'arcade';
+export type GameType = 'chess' | 'checkers' | 'arcade' | 'dota2' | 'csgo';
 
 export interface User {
   id: number;
@@ -46,4 +46,5 @@ export interface Payment {
   from_address?: string;
   tx_hash?: string;
   status: PaymentStatus;
+  token_symbol?: string;
 }
