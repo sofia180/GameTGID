@@ -8,5 +8,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 20%, #0f172a, #0b1224 35%, #070c1a 70%), radial-gradient(circle at 80% 10%, #0a1a2f, transparent 40%), #050910;
+  color: #e2e8f0;
 }
