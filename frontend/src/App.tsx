@@ -13,6 +13,7 @@ import {
   adminStartTournament,
   adminCompleteTournament
 } from './api';
+import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 
 interface Tournament {
   id: number;
@@ -28,11 +29,17 @@ function App() {
   const [selected, setSelected] = useState<number | null>(null);
   const [board, setBoard] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-   const [paymentInfo, setPaymentInfo] = useState<{ memo: string; wallet: string; amount: number } | null>(null);
-   const [fromAddress, setFromAddress] = useState('');
-   const [adminKey, setAdminKey] = useState('');
-   const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0 });
+  const [paymentInfo, setPaymentInfo] = useState<{ memo: string; wallet: string; amount: number } | null>(null);
+  const [fromAddress, setFromAddress] = useState('');
+  const [adminKey, setAdminKey] = useState('');
+  const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0 });
   const initData = useMemo(() => WebApp.initData || '', []);
+  const wallet = useTonWallet();
+  const tonAddress = useTonAddress();
+
+  useEffect(() => {
+    if (tonAddress) setFromAddress(tonAddress);
+  }, [tonAddress]);
 
   useEffect(() => {
     WebApp.ready();
@@ -86,6 +93,9 @@ function App() {
         const intent = await createPaymentIntent(t.id);
         setPaymentInfo(intent);
         setSelected(t.id);
+        if (!tonAddress) {
+          alert('Подключите TON кошелёк через кнопку в шапке');
+        }
         alert(`Отправьте ${intent.amount} TON на ${intent.wallet} с комментарием ${intent.memo}, затем подтвердите оплату.`);
       } else {
         await joinTournament(t.id, {});
@@ -151,9 +161,10 @@ function App() {
           <h1 className="text-xl font-semibold">Quick Matches</h1>
         </div>
         {me && (
-          <div className="text-right text-sm">
+          <div className="text-right text-sm space-y-1">
             <div>@{me.username || me.telegram_id}</div>
             <div className="text-slate-400">Balance: {me.balance ?? 0}</div>
+            <div className="flex justify-end"><TonConnectButton /></div>
           </div>
         )}
       </header>

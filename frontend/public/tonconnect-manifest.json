@@ -1,0 +1,5 @@
+{
+  "url": "https://example.com/ton-manifest",
+  "name": "GameTGID Mini App",
+  "iconUrl": "https://raw.githubusercontent.com/ton-connect/sdk/main/assets/tonconnect-logo.png"
+}
