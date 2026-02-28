@@ -2,6 +2,7 @@ import axios from 'axios';
 import { env } from '../config/env.js';
 import { pool } from '../db/pool.js';
 import { markPaymentConfirmed } from './paymentService.js';
+import { startJettonWatcher } from './jettonWatcher.js';
 
 // Poll toncenter and confirm pending payments by memo & amount
 export function startPaymentWatcher() {
@@ -38,4 +39,7 @@ export function startPaymentWatcher() {
       console.error('TON watcher error', err.message || err);
     }
   }, interval);
+
+  // Also start jetton watcher if configured
+  startJettonWatcher();
 }

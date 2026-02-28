@@ -33,6 +33,8 @@ function App() {
   const [fromAddress, setFromAddress] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0, game_type: 'arcade' });
+  const [adminParticipants, setAdminParticipants] = useState<any[]>([]);
+  const [adminMatches, setAdminMatches] = useState<any[]>([]);
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
@@ -150,6 +152,17 @@ function App() {
       alert(`Tournament ${action}ed`);
     } catch (err) {
       alert(`Admin ${action} failed`);
+    }
+  }
+
+  async function loadAdminData(id: number) {
+    if (!adminKey) return;
+    try {
+      const [p, m] = await Promise.all([adminParticipants(id, adminKey), adminMatches(id, adminKey)]);
+      setAdminParticipants(p);
+      setAdminMatches(m);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -289,10 +302,36 @@ function App() {
                 <button className="bg-red-500 text-black px-2 rounded" onClick={() => handleAdminAction('complete', t.id)}>
                   Complete
                 </button>
+                <button className="bg-slate-600 text-white px-2 rounded" onClick={() => loadAdminData(t.id)}>
+                  Inspect
+                </button>
               </div>
             </div>
           ))}
         </div>
+
+        {!!adminParticipants.length && (
+          <div className="bg-slate-800 rounded p-3 text-sm space-y-1">
+            <div className="font-semibold">Participants ({adminParticipants.length})</div>
+            {adminParticipants.map((p) => (
+              <div key={p.id} className="flex justify-between border-b border-slate-700 py-1">
+                <span>@{p.username || p.telegram_id}</span>
+                <span className="text-slate-400">id:{p.user_id}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {!!adminMatches.length && (
+          <div className="bg-slate-800 rounded p-3 text-sm space-y-1">
+            <div className="font-semibold">Matches ({adminMatches.length})</div>
+            {adminMatches.map((m) => (
+              <div key={m.id} className="flex justify-between border-b border-slate-700 py-1">
+                <span>#{m.id} {m.game_type}</span>
+                <span className="text-slate-400">p1:{m.player1} p2:{m.player2} winner:{m.winner || '-'}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

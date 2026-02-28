@@ -13,6 +13,7 @@ import {
 } from '../controllers/tournamentController.js';
 import { leaderboard, reportMatch } from '../controllers/matchController.js';
 import { paymentIntent, paymentVerify } from '../controllers/paymentController.js';
+import { listParticipantsAdmin, listMatchesAdmin } from '../controllers/adminController.js';
 
 const router = Router();
 
@@ -28,6 +29,8 @@ router.post('/tournaments/:id/start', adminAuth, startTournamentHandler);
 router.post('/tournaments/:id/complete', adminAuth, completeTournamentHandler);
 router.get('/tournaments/:id/participants', adminAuth, participantsHandler);
 router.get('/tournaments/:id/matches', adminAuth, matchesHandler);
+router.get('/admin/tournaments/:id/participants', adminAuth, listParticipantsAdmin);
+router.get('/admin/tournaments/:id/matches', adminAuth, listMatchesAdmin);
 
 router.post('/matches/:id/report', adminAuth, reportMatch);
 

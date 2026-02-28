@@ -44,6 +44,16 @@ export async function leaderboard(id: number) {
   return data.leaderboard;
 }
 
+export async function adminParticipants(id: number, adminKey: string) {
+  const { data } = await api.get(`/admin/tournaments/${id}/participants`, { headers: { 'x-admin-key': adminKey } });
+  return data.participants;
+}
+
+export async function adminMatches(id: number, adminKey: string) {
+  const { data } = await api.get(`/admin/tournaments/${id}/matches`, { headers: { 'x-admin-key': adminKey } });
+  return data.matches;
+}
+
 export async function adminCreateTournament(body: { title: string; entry_fee: number; prize_pool: number; game_type: string }, adminKey: string) {
   const { data } = await api.post('/tournaments', body, { headers: { 'x-admin-key': adminKey } });
   return data.tournament;
