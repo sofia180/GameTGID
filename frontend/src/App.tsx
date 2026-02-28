@@ -32,7 +32,7 @@ function App() {
   const [paymentInfo, setPaymentInfo] = useState<{ memo: string; wallet: string; amount: number } | null>(null);
   const [fromAddress, setFromAddress] = useState('');
   const [adminKey, setAdminKey] = useState('');
-  const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0 });
+  const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0, game_type: 'arcade' });
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
@@ -176,7 +176,7 @@ function App() {
             <div key={t.id} className="rounded-lg bg-slate-800 p-3 flex justify-between items-center">
               <div>
                 <div className="font-medium">{t.title}</div>
-                <div className="text-xs text-slate-400">Entry: {t.entry_fee} TON · Prize: {t.prize_pool} TON · {t.status}</div>
+                <div className="text-xs text-slate-400">Game: {t.game_type} · Entry: {t.entry_fee} TON · Prize: {t.prize_pool} TON · {t.status}</div>
               </div>
               <div className="flex gap-2">
                 <button
@@ -264,6 +264,15 @@ function App() {
               onChange={(e) => setNewTournament({ ...newTournament, prize_pool: Number(e.target.value) })}
             />
           </div>
+          <select
+            className="rounded bg-slate-800 px-3 py-2 text-sm"
+            value={newTournament.game_type}
+            onChange={(e) => setNewTournament({ ...newTournament, game_type: e.target.value })}
+          >
+            <option value="arcade">Arcade</option>
+            <option value="chess">Chess</option>
+            <option value="checkers">Checkers</option>
+          </select>
           <button className="bg-indigo-500 text-black px-3 py-2 rounded" onClick={handleAdminCreate}>
             Create tournament
           </button>

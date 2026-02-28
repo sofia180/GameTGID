@@ -12,10 +12,10 @@ export async function tournamentById(id: number): Promise<Tournament | null> {
   return rows[0] || null;
 }
 
-export async function createTournament(input: { title: string; entry_fee: number; prize_pool: number }): Promise<Tournament> {
+export async function createTournament(input: { title: string; entry_fee: number; prize_pool: number; game_type: string }): Promise<Tournament> {
   const { rows } = await pool.query(
-    'INSERT INTO tournaments (title, entry_fee, prize_pool, status) VALUES ($1,$2,$3,$4) RETURNING *',
-    [input.title, input.entry_fee, input.prize_pool, 'pending']
+    'INSERT INTO tournaments (title, entry_fee, prize_pool, status, game_type) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+    [input.title, input.entry_fee, input.prize_pool, 'pending', input.game_type]
   );
   return rows[0];
 }

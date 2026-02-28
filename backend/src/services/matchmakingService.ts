@@ -6,6 +6,8 @@ export async function pairPlayers(tournamentId: number): Promise<Match[]> {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    const tRes = await client.query('SELECT game_type FROM tournaments WHERE id=$1', [tournamentId]);
+    const gameType = tRes.rows?.[0]?.game_type || 'arcade';
     const { rows } = await client.query(
       `SELECT p.user_id FROM participants p
        WHERE p.tournament_id=$1 AND NOT EXISTS (
@@ -20,8 +22,8 @@ export async function pairPlayers(tournamentId: number): Promise<Match[]> {
       const p1 = rows[i].user_id;
       const p2 = rows[i + 1].user_id;
       const inserted = await client.query(
-        'INSERT INTO matches (tournament_id, player1, player2, status) VALUES ($1,$2,$3,$4) RETURNING *',
-        [tournamentId, p1, p2, 'pending']
+        'INSERT INTO matches (tournament_id, player1, player2, status, game_type) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+        [tournamentId, p1, p2, 'pending', gameType]
       );
       matches.push(inserted.rows[0]);
       emitEvent('match:created', { tournamentId, matchId: inserted.rows[0].id });

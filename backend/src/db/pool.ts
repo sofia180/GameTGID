@@ -23,6 +23,7 @@ export async function migrate() {
       entry_fee NUMERIC DEFAULT 0,
       prize_pool NUMERIC DEFAULT 0,
       status TEXT DEFAULT 'pending',
+      game_type TEXT DEFAULT 'arcade',
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE TABLE IF NOT EXISTS participants (
@@ -37,7 +38,8 @@ export async function migrate() {
       player1 INTEGER REFERENCES users(id),
       player2 INTEGER REFERENCES users(id),
       winner INTEGER REFERENCES users(id),
-      status TEXT DEFAULT 'pending'
+      status TEXT DEFAULT 'pending',
+      game_type TEXT DEFAULT 'arcade'
     );
     CREATE TABLE IF NOT EXISTS payments (
       id SERIAL PRIMARY KEY,
@@ -53,4 +55,15 @@ export async function migrate() {
     );
     CREATE INDEX IF NOT EXISTS payments_user_tournament_idx ON payments(user_id, tournament_id);
   `);
+
+  // Add columns if missing (idempotent)
+  await pool.query(`DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tournaments' AND column_name='game_type') THEN
+        ALTER TABLE tournaments ADD COLUMN game_type TEXT DEFAULT 'arcade';
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='matches' AND column_name='game_type') THEN
+        ALTER TABLE matches ADD COLUMN game_type TEXT DEFAULT 'arcade';
+      END IF;
+    END$$;`);
 }

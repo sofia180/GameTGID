@@ -44,7 +44,7 @@ export async function leaderboard(id: number) {
   return data.leaderboard;
 }
 
-export async function adminCreateTournament(body: { title: string; entry_fee: number; prize_pool: number }, adminKey: string) {
+export async function adminCreateTournament(body: { title: string; entry_fee: number; prize_pool: number; game_type: string }, adminKey: string) {
   const { data } = await api.post('/tournaments', body, { headers: { 'x-admin-key': adminKey } });
   return data.tournament;
 }

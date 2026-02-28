@@ -1,6 +1,7 @@
 export type TournamentStatus = 'pending' | 'active' | 'completed' | 'cancelled';
 export type MatchStatus = 'pending' | 'in_progress' | 'completed';
 export type PaymentStatus = 'pending' | 'confirmed' | 'failed';
+export type GameType = 'chess' | 'checkers' | 'arcade';
 
 export interface User {
   id: number;
@@ -16,6 +17,7 @@ export interface Tournament {
   entry_fee: number;
   prize_pool: number;
   status: TournamentStatus;
+  game_type: GameType;
   created_at: string;
 }
 
@@ -32,6 +34,7 @@ export interface Match {
   player2: number;
   winner?: number | null;
   status: MatchStatus;
+  game_type?: GameType;
 }
 
 export interface Payment {
