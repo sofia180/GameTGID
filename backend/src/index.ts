@@ -6,6 +6,7 @@ import router from './routes/index.js';
 import { env } from './config/env.js';
 import { migrate } from './db/pool.js';
 import { initWebsocket } from './ws/server.js';
+import { startPaymentWatcher } from './services/paymentWatcher.js';
 
 async function bootstrap() {
   await migrate();
@@ -18,6 +19,7 @@ async function bootstrap() {
 
   const server = http.createServer(app);
   initWebsocket(server);
+  startPaymentWatcher();
 
   server.listen(env.port, () => {
     console.log(`API listening on :${env.port}`);

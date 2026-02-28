@@ -31,3 +31,7 @@ cd bot && cp .env.example .env && npm install && npm run dev   # опциона�
 ```bash
 node scripts/seed.js
 ```
+
+## CI/CD
+- CI: `.github/workflows/ci.yml` (build backend/frontend).
+- Deploy to Railway: `.github/workflows/deploy.yml` (требует secrets: `RAILWAY_TOKEN`, `RAILWAY_PROJECT_ID`, `RAILWAY_BACKEND_SERVICE_ID`, `RAILWAY_FRONTEND_SERVICE_ID`).

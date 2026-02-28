@@ -1,0 +1,27 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: railwayapp/railway-action@v1
+        with:
+          railwayToken: ${{ secrets.RAILWAY_TOKEN }}
+          service: ${{ secrets.RAILWAY_BACKEND_SERVICE_ID }}
+          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
+          path: backend
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: railwayapp/railway-action@v1
+        with:
+          railwayToken: ${{ secrets.RAILWAY_TOKEN }}
+          service: ${{ secrets.RAILWAY_FRONTEND_SERVICE_ID }}
+          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
+          path: frontend
