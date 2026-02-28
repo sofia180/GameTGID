@@ -11,7 +11,10 @@ import {
   fetchSocketToken,
   adminCreateTournament,
   adminStartTournament,
-  adminCompleteTournament
+  adminCompleteTournament,
+  walletLink,
+  adminParticipants as fetchAdminParticipants,
+  adminMatches as fetchAdminMatches
 } from './api';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 
@@ -30,6 +33,7 @@ function App() {
   const [board, setBoard] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState<{ memo: string; wallet: string; amount: number } | null>(null);
+  const [walletUrls, setWalletUrls] = useState<{ tonTransferUrl: string; telegramWalletUrl: string } | null>(null);
   const [fromAddress, setFromAddress] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [newTournament, setNewTournament] = useState({ title: '', entry_fee: 0, prize_pool: 0, game_type: 'arcade' });
@@ -94,6 +98,8 @@ function App() {
       if (t.entry_fee > 0) {
         const intent = await createPaymentIntent(t.id);
         setPaymentInfo(intent);
+        const wl = await walletLink(t.id);
+        setWalletUrls({ tonTransferUrl: wl.tonTransferUrl, telegramWalletUrl: wl.telegramWalletUrl });
         setSelected(t.id);
         if (!tonAddress) {
           alert('Подключите TON кошелёк через кнопку в шапке');
@@ -215,6 +221,16 @@ function App() {
         <section className="rounded-lg bg-slate-800 p-3 space-y-2">
           <h3 className="font-semibold">Оплата TON</h3>
           <p className="text-sm text-slate-300">Отправьте {paymentInfo.amount} TON на адрес <span className="font-mono">{paymentInfo.wallet}</span> с комментарием <span className="font-mono">{paymentInfo.memo}</span>.</p>
+          {walletUrls && (
+            <div className="flex gap-2">
+              <a className="flex-1 text-center bg-emerald-400 text-black rounded px-3 py-2 text-sm font-semibold" href={walletUrls.tonTransferUrl}>
+                ton://transfer
+              </a>
+              <a className="flex-1 text-center bg-sky-400 text-black rounded px-3 py-2 text-sm font-semibold" href={walletUrls.telegramWalletUrl}>
+                Открыть @wallet
+              </a>
+            </div>
+          )}
           <input
             className="w-full rounded bg-slate-900 px-3 py-2 text-sm"
             placeholder="Ваш TON адрес"

@@ -27,3 +27,17 @@ export async function paymentVerify(req: AuthedRequest, res: Response) {
   const updated = await markPaymentConfirmed(memo, fromAddress, result.txHash);
   res.json({ status: 'confirmed', payment: updated });
 }
+
+export async function walletLink(req: AuthedRequest, res: Response) {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+  const { tournamentId } = req.query;
+  if (!tournamentId) return res.status(400).json({ error: 'tournamentId required' });
+  const { rows } = await pool.query('SELECT entry_fee FROM tournaments WHERE id=$1', [tournamentId]);
+  if (!rows.length) return res.status(404).json({ error: 'Tournament not found' });
+  const fee = Number(rows[0].entry_fee || 0);
+  const intent = await createPaymentIntent(req.user.id, Number(tournamentId), fee);
+  const amount = fee > 0 ? fee : 0;
+  const tonTransferUrl = `ton://transfer/${process.env.TON_WALLET}?amount=${Math.ceil(amount * 1e9)}&text=${intent.memo}`;
+  const telegramWalletUrl = `https://t.me/wallet?startapp=transfer-${process.env.TON_WALLET}-${amount}-${intent.memo}`;
+  res.json({ memo: intent.memo, amount, tonTransferUrl, telegramWalletUrl });
+}

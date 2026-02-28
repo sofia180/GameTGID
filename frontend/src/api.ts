@@ -39,6 +39,11 @@ export async function verifyPayment(body: { memo: string; fromAddress: string; a
   return data;
 }
 
+export async function walletLink(tournamentId: number) {
+  const { data } = await api.get('/payments/wallet-link', { params: { tournamentId } });
+  return data as { memo: string; amount: number; tonTransferUrl: string; telegramWalletUrl: string };
+}
+
 export async function leaderboard(id: number) {
   const { data } = await api.get(`/tournaments/${id}/leaderboard`);
   return data.leaderboard;

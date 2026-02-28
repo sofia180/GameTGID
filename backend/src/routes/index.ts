@@ -12,7 +12,7 @@ import {
   matchesHandler
 } from '../controllers/tournamentController.js';
 import { leaderboard, reportMatch } from '../controllers/matchController.js';
-import { paymentIntent, paymentVerify } from '../controllers/paymentController.js';
+import { paymentIntent, paymentVerify, walletLink } from '../controllers/paymentController.js';
 import { listParticipantsAdmin, listMatchesAdmin } from '../controllers/adminController.js';
 
 const router = Router();
@@ -36,5 +36,6 @@ router.post('/matches/:id/report', adminAuth, reportMatch);
 
 router.post('/payments/intent', telegramAuth, paymentIntent);
 router.post('/payments/verify', telegramAuth, paymentVerify);
+router.get('/payments/wallet-link', telegramAuth, walletLink);
 
 export default router;
