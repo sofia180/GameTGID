@@ -9,7 +9,8 @@ export const env = {
   tonApiKey: process.env.TON_API_KEY || '',
   tonWallet: process.env.TON_WALLET || '',
   allowedOrigin: process.env.ALLOWED_ORIGIN || '*',
-  adminApiKey: process.env.ADMIN_API_KEY || 'change-me'
+  adminApiKey: process.env.ADMIN_API_KEY || 'change-me',
+  wsSecret: process.env.WS_SECRET || 'ws-secret'
 };
 
 if (!env.databaseUrl) {

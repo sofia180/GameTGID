@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { createTournament, joinTournament, listTournaments } from '../services/tournamentService.js';
+import { createTournament, joinTournament, listTournaments, startTournament, completeTournament, tournamentById, listParticipants, listMatches } from '../services/tournamentService.js';
 import { AuthedRequest } from '../middleware/telegramAuth.js';
 import { pairPlayers } from '../services/matchmakingService.js';
-import { verifyTonPayment } from '../services/paymentService.js';
+import { findConfirmedPayment } from '../services/paymentService.js';
 
 const createSchema = z.object({
   title: z.string().min(3),
@@ -25,16 +25,40 @@ export async function createTournamentHandler(req: Request, res: Response) {
 
 export async function joinTournamentHandler(req: AuthedRequest, res: Response) {
   const tournamentId = Number(req.params.id);
-  const { walletAddress, paymentHash, amountNano, memo } = req.body || {};
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 
-  // Basic TON payment verification (off-chain)
-  if (amountNano && walletAddress) {
-    const ok = await verifyTonPayment({ fromAddress: walletAddress, amountNano: amountNano.toString(), memo });
-    if (!ok) return res.status(402).json({ error: 'Payment not found or insufficient' });
+  const tournament = await tournamentById(tournamentId);
+  if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
+  if (Number(tournament.entry_fee) > 0) {
+    const confirmed = await findConfirmedPayment(req.user.id, tournamentId);
+    if (!confirmed) return res.status(402).json({ error: 'Payment required' });
   }
 
   await joinTournament(tournamentId, req.user.id);
   const newMatches = await pairPlayers(tournamentId);
   res.json({ status: 'joined', matchesCreated: newMatches.length });
+}
+
+export async function startTournamentHandler(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  await startTournament(id);
+  res.json({ status: 'started' });
+}
+
+export async function completeTournamentHandler(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  await completeTournament(id);
+  res.json({ status: 'completed' });
+}
+
+export async function participantsHandler(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const participants = await listParticipants(id);
+  res.json({ participants });
+}
+
+export async function matchesHandler(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const matches = await listMatches(id);
+  res.json({ matches });
 }

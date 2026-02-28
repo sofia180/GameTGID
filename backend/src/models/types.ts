@@ -1,5 +1,6 @@
 export type TournamentStatus = 'pending' | 'active' | 'completed' | 'cancelled';
 export type MatchStatus = 'pending' | 'in_progress' | 'completed';
+export type PaymentStatus = 'pending' | 'confirmed' | 'failed';
 
 export interface User {
   id: number;
@@ -31,4 +32,15 @@ export interface Match {
   player2: number;
   winner?: number | null;
   status: MatchStatus;
+}
+
+export interface Payment {
+  id: number;
+  user_id: number;
+  tournament_id: number;
+  amount: number;
+  memo: string;
+  from_address?: string;
+  tx_hash?: string;
+  status: PaymentStatus;
 }

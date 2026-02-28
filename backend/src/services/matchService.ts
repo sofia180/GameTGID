@@ -1,5 +1,6 @@
 import { pool } from '../db/pool.js';
 import { Match } from '../models/types.js';
+import { emitEvent } from '../utils/events.js';
 
 export async function reportResult(matchId: number, winnerId: number): Promise<Match> {
   const client = await pool.connect();
@@ -16,6 +17,7 @@ export async function reportResult(matchId: number, winnerId: number): Promise<M
       [matchId, winnerId, 'completed']
     );
     await client.query('COMMIT');
+    emitEvent('match:updated', { tournamentId: match.tournament_id, matchId, winnerId });
     return updated.rows[0];
   } catch (err) {
     await client.query('ROLLBACK');

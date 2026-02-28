@@ -1,11 +1,24 @@
 import { WebSocketServer } from 'ws';
 import { eventBus } from '../utils/events.js';
 import http from 'http';
+import { verifySocketToken } from '../utils/jwt.js';
 
 export function initWebsocket(server: http.Server) {
   const wss = new WebSocketServer({ server, path: '/ws' });
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws, req) => {
+    const url = new URL(req.url || '', 'http://localhost');
+    const token = url.searchParams.get('token');
+    if (!token) {
+      ws.close(4001, 'token required');
+      return;
+    }
+    try {
+      verifySocketToken(token);
+    } catch (err) {
+      ws.close(4002, 'invalid token');
+      return;
+    }
     ws.send(JSON.stringify({ type: 'welcome', ts: Date.now() }));
   });
 
