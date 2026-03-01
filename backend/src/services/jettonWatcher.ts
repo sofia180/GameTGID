@@ -42,7 +42,8 @@ export function startJettonWatcher() {
           const comment = tr?.comment || tr?.message;
           if (!comment) continue;
           const payment = await getPaymentByMemo(comment);
-          if (!payment || payment.token_symbol.toUpperCase() !== (jet.symbol || 'JET').toUpperCase()) continue;
+          const symbol = (payment?.token_symbol || '').toUpperCase();
+          if (!payment || symbol !== (jet.symbol || 'JET').toUpperCase()) continue;
           const expected = BigInt(Math.ceil(Number(payment.amount) * 10 ** (jet.decimals || 9)));
           const value = BigInt(tr?.amount || tr?.value || 0);
           if (value < expected) continue;

@@ -3,7 +3,7 @@ import { env } from '../config/env.js';
 
 export const pool = new Pool({ connectionString: env.databaseUrl });
 
-pool.on('error', (err) => {
+pool.on('error', (err: any) => {
   console.error('Unexpected PG error', err);
 });
 

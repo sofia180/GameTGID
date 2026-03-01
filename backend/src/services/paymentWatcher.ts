@@ -13,7 +13,7 @@ export function startPaymentWatcher() {
   const interval = Math.max(5000, env.tonPollIntervalMs);
   setInterval(async () => {
     try {
-      const pend = await pool.query(
+      const pend = await pool.query<{ memo: string; amount: number }>(
         `SELECT memo, amount FROM payments WHERE status='pending' ORDER BY created_at DESC LIMIT 50`
       );
       if (!pend.rowCount) return;
@@ -35,8 +35,8 @@ export function startPaymentWatcher() {
         await markPaymentConfirmed(comment, from, hash);
         console.log('TON payment confirmed', comment);
       }
-    } catch (err) {
-      console.error('TON watcher error', err.message || err);
+    } catch (err: any) {
+      console.error('TON watcher error', err?.message || err);
     }
   }, interval);
 
