@@ -16,9 +16,13 @@ import {
   adminParticipants as fetchAdminParticipants,
   adminMatches as fetchAdminMatches,
   createRoom,
-  getRoom
+  getRoom,
+  myMatches,
+  matchState,
+  move
 } from './api';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
+import { ChessBoard } from './chessBoard';
 
 interface Tournament {
   id: number;
@@ -43,6 +47,9 @@ function App() {
   const [adminMatches, setAdminMatches] = useState<any[]>([]);
   const [token, setToken] = useState('TON');
   const [rooms, setRooms] = useState<Record<number, any>>({});
+  const [myActiveMatches, setMyActiveMatches] = useState<any[]>([]);
+  const [currentMatch, setCurrentMatch] = useState<any | null>(null);
+  const [currentFen, setCurrentFen] = useState<string>('');
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
@@ -59,6 +66,7 @@ function App() {
         const user = await fetchMe();
         setMe(user);
         await loadTournaments();
+        await loadMyMatches();
       } catch (err) {
         console.error(err);
       }
@@ -76,6 +84,7 @@ function App() {
           if (msg.type?.startsWith('match') || msg.type === 'tournament_updated') {
             await loadTournaments();
             if (selected) await loadLeaderboard(selected);
+            await loadMyMatches();
           }
         };
       } catch (err) {
@@ -88,6 +97,41 @@ function App() {
   async function loadTournaments() {
     const list = await fetchTournaments();
     setTournaments(list);
+  }
+
+  async function loadMyMatches() {
+    try {
+      const { matches } = await myMatches();
+      setMyActiveMatches(matches);
+      if (matches.length && !currentMatch) {
+        await openMatch(matches[0].id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function openMatch(id: number) {
+    try {
+      const data = await matchState(id);
+      setCurrentMatch(data.match);
+      setCurrentFen(data.fen);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleMove(from: string, to: string) {
+    if (!currentMatch) return;
+    try {
+      const res = await move(currentMatch.id, { from, to });
+      setCurrentFen(res.fen);
+      await loadLeaderboard(currentMatch.tournament_id);
+      await loadMyMatches();
+    } catch (err) {
+      alert('Illegal move');
+      console.error(err);
+    }
   }
 
   async function loadLeaderboard(id: number) {
@@ -326,6 +370,42 @@ function App() {
           </div>
         </section>
       )}
+
+      <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold">My matches</h3>
+          <button className="text-xs text-emerald-300" onClick={loadMyMatches}>Refresh</button>
+        </div>
+        <div className="flex gap-3 flex-wrap">
+          {myActiveMatches.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => openMatch(m.id)}
+              className={`px-3 py-2 rounded-lg border ${currentMatch?.id === m.id ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-700 bg-slate-900'}`}
+            >
+              #{m.id} {m.game_type} ({m.status})
+            </button>
+          ))}
+          {!myActiveMatches.length && <span className="text-sm text-slate-500">Нет активных матчей</span>}
+        </div>
+        {currentMatch && currentFen && currentMatch.game_type === 'chess' && (
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <ChessBoard
+              fen={currentFen}
+              myColor={currentMatch.player1 === me?.id ? 'w' : 'b'}
+              turn={currentFen.includes(' w ') ? 'w' : 'b'}
+              onMove={handleMove}
+            />
+            <div className="text-sm text-slate-300 space-y-2">
+              <div>Match #{currentMatch.id} · {currentMatch.status}</div>
+              <div>White: {currentMatch.player1 === me?.id ? 'You' : currentMatch.player1}</div>
+              <div>Black: {currentMatch.player2 === me?.id ? 'You' : currentMatch.player2}</div>
+              <div>Turn: {currentFen.includes(' w ') ? 'White' : 'Black'}</div>
+              <button className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700" onClick={loadMyMatches}>Sync</button>
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-indigo-500/10 space-y-4">
         <div className="flex items-center justify-between">

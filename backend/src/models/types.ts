@@ -35,6 +35,7 @@ export interface Match {
   winner?: number | null;
   status: MatchStatus;
   game_type?: GameType;
+  state?: string | null;
 }
 
 export interface Payment {

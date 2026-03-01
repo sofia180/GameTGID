@@ -89,4 +89,19 @@ export async function createRoom(matchId: number, adminKey: string) {
   return data.room;
 }
 
+export async function myMatches() {
+  const { data } = await api.get('/matches');
+  return data.matches;
+}
+
+export async function matchState(matchId: number) {
+  const { data } = await api.get(`/matches/${matchId}/state`);
+  return data;
+}
+
+export async function move(matchId: number, body: { from: string; to: string; promotion?: string }) {
+  const { data } = await api.post(`/matches/${matchId}/move`, body);
+  return data;
+}
+
 export default api;

@@ -39,7 +39,8 @@ export async function migrate() {
       player2 INTEGER REFERENCES users(id),
       winner INTEGER REFERENCES users(id),
       status TEXT DEFAULT 'pending',
-      game_type TEXT DEFAULT 'arcade'
+      game_type TEXT DEFAULT 'arcade',
+      state TEXT
     );
     CREATE TABLE IF NOT EXISTS payments (
       id SERIAL PRIMARY KEY,
@@ -77,6 +78,9 @@ export async function migrate() {
       END IF;
       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='token_symbol') THEN
         ALTER TABLE payments ADD COLUMN token_symbol TEXT DEFAULT 'TON';
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='matches' AND column_name='state') THEN
+        ALTER TABLE matches ADD COLUMN state TEXT;
       END IF;
     END$$;`);
 }
