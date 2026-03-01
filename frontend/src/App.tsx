@@ -51,6 +51,7 @@ function App() {
   const [myActiveMatches, setMyActiveMatches] = useState<any[]>([]);
   const [currentMatch, setCurrentMatch] = useState<any | null>(null);
   const [currentFen, setCurrentFen] = useState<string>('');
+  const [tab, setTab] = useState<'play' | 'tournaments' | 'admin'>('tournaments');
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
@@ -261,6 +262,19 @@ function App() {
         )}
       </header>
 
+      <div className="flex gap-2">
+        {['play', 'tournaments', 'admin'].map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t as any)}
+            className={`px-3 py-2 rounded-lg border text-sm ${tab === t ? 'bg-emerald-400 text-black border-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-200'}`}
+          >
+            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : 'Admin'}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'tournaments' && (
       <section className="grid gap-3 md:grid-cols-3">
         <div className="md:col-span-2 rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
           <div className="flex items-center justify-between mb-3">
@@ -317,8 +331,9 @@ function App() {
           </div>
         </div>
       </section>
+      )}
 
-      {paymentInfo && (
+      {tab === 'tournaments' && paymentInfo && (
         <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-3 shadow-lg shadow-emerald-500/10">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Оплата {token}</h3>
@@ -351,12 +366,12 @@ function App() {
         </section>
       )}
 
-      {selected && (
-      <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold">Leaderboard</h2>
-          <span className="text-xs text-slate-400">Tournament #{selected}</span>
-        </div>
+      {tab === 'tournaments' && selected && (
+        <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold">Leaderboard</h2>
+            <span className="text-xs text-slate-400">Tournament #{selected}</span>
+          </div>
           <div className="space-y-2">
             {board.map((r, idx) => (
               <div key={r.id} className="flex justify-between items-center rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
@@ -372,6 +387,7 @@ function App() {
         </section>
       )}
 
+      {tab === 'play' && (
       <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">My matches</h3>
@@ -407,9 +423,11 @@ function App() {
           </div>
         )}
       </section>
+      )}
 
-      <CasualPlay onMatchOpen={(id) => openMatch(id)} />
+      {tab === 'play' && <CasualPlay onMatchOpen={(id) => openMatch(id)} />}
 
+      {tab === 'admin' && (
       <section className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-indigo-500/10 space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -516,6 +534,7 @@ function App() {
           </div>
         )}
       </section>
+      )}
     </div>
   );
 }
