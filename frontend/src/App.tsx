@@ -56,7 +56,7 @@ function App() {
   const [myActiveMatches, setMyActiveMatches] = useState<any[]>([]);
   const [currentMatch, setCurrentMatch] = useState<any | null>(null);
   const [currentFen, setCurrentFen] = useState<string>('');
-  const [tab, setTab] = useState<'play' | 'tournaments' | 'admin'>('tournaments');
+  const [tab, setTab] = useState<'play' | 'tournaments' | 'games' | 'admin'>('tournaments');
   const [bigWin, setBigWin] = useState<{ amount: number; user: string } | null>(null);
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
@@ -284,13 +284,13 @@ function App() {
       </header>
 
       <div className="flex gap-2">
-        {['play', 'tournaments', 'admin'].map((t) => (
+        {['tournaments', 'play', 'games', 'admin'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
             className={`px-3 py-2 rounded-lg border text-sm ${tab === t ? 'bg-emerald-400 text-black border-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-200'}`}
           >
-            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : 'Admin'}
+            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : t === 'games' ? 'Games' : 'Admin'}
           </button>
         ))}
       </div>
@@ -426,26 +426,6 @@ function App() {
           <p>3) Match appears in “My matches” — move pieces on the board. White = creator.</p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
-          {[
-            { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
-            { name: 'Checkers', status: 'Coming soon', color: 'from-indigo-400 to-purple-500', active: false },
-            { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
-            { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
-            { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
-          ].map((g) => (
-            <button
-              key={g.name}
-              onClick={() => !g.active && alert('Coming soon')}
-              className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl`}
-            >
-              <div className="text-lg font-semibold">{g.name}</div>
-              <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
-              {g.active && <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">Play now</div>}
-            </button>
-          ))}
-        </div>
-
         <div className="flex gap-3 flex-wrap">
           {myActiveMatches.map((m) => (
             <button
@@ -479,6 +459,34 @@ function App() {
       )}
 
       {tab === 'play' && <CasualPlay onMatchOpen={(id) => openMatch(id)} />}
+
+      {tab === 'games' && (
+        <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="text-white text-lg font-semibold">Games hub</div>
+            <button className="text-xs text-emerald-300 underline" onClick={() => setTab('tournaments')}>← Back to tournaments</button>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
+              { name: 'Checkers', status: 'Coming soon', color: 'from-indigo-400 to-purple-500', active: false },
+              { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
+              { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
+              { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
+            ].map((g) => (
+              <button
+                key={g.name}
+                onClick={() => !g.active && alert('Coming soon')}
+                className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl`}
+              >
+                <div className="text-lg font-semibold">{g.name}</div>
+                <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
+                {g.active && <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">Play now</div>}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {tab === 'admin' && (
       <section className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-indigo-500/10 space-y-4">
