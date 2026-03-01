@@ -24,6 +24,8 @@ import {
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 import { ChessBoard } from './chessBoard';
 import { CasualPlay } from './components/CasualPlay';
+import CheckersBoard from './components/CheckersBoard';
+import BattleshipBoard from './components/BattleshipBoard';
 import LiveTicker from './components/LiveTicker';
 import HeroBlock from './components/HeroBlock';
 import GlobalActivity from './components/GlobalActivity';
@@ -150,6 +152,30 @@ function App() {
       await loadMyMatches();
     } catch (err) {
       alert('Illegal move');
+      console.error(err);
+    }
+  }
+
+  async function handleCheckersMove(from: string, to: string) {
+    if (!currentMatch) return;
+    try {
+      const res = await move(currentMatch.id, { from, to });
+      await loadMyMatches();
+      setCurrentMatch((m:any)=>m); // trigger rerender
+    } catch (err) {
+      alert('Illegal move');
+      console.error(err);
+    }
+  }
+
+  async function handleBattleShot(coord: string) {
+    if (!currentMatch) return;
+    try {
+      await move(currentMatch.id, { target: coord });
+      await loadMyMatches();
+      setCurrentMatch((m:any)=>m);
+    } catch (err) {
+      alert('Illegal shot');
       console.error(err);
     }
   }
@@ -454,6 +480,25 @@ function App() {
               <button className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700" onClick={loadMyMatches}>Sync</button>
             </div>
           </div>
+        )}
+
+        {currentMatch && currentMatch.game_type === 'checkers' && currentMatch.state && (
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <CheckersBoard state={JSON.parse(currentMatch.state)} onMove={handleCheckersMove} isMyTurn={(currentMatch.player1 === me?.id && JSON.parse(currentMatch.state).turn === 'p1') || (currentMatch.player2 === me?.id && JSON.parse(currentMatch.state).turn === 'p2')} />
+            <div className="text-sm text-slate-300 space-y-2">
+              <div>Match #{currentMatch.id} · {currentMatch.status}</div>
+              <div>Turn: {JSON.parse(currentMatch.state).turn === 'p1' ? 'White' : 'Black'}</div>
+            </div>
+          </div>
+        )}
+
+        {currentMatch && currentMatch.game_type === 'battleship' && currentMatch.state && (
+          <BattleshipBoard
+            state={JSON.parse(currentMatch.state)}
+            me={currentMatch.player1 === me?.id ? 'p1' : 'p2'}
+            isMyTurn={(currentMatch.player1 === me?.id && JSON.parse(currentMatch.state).turn === 'p1') || (currentMatch.player2 === me?.id && JSON.parse(currentMatch.state).turn === 'p2')}
+            onShoot={handleBattleShot}
+          />
         )}
       </section>
       )}
