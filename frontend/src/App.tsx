@@ -426,6 +426,26 @@ function App() {
           <p>3) Match appears in “My matches” — move pieces on the board. White = creator.</p>
         </div>
 
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
+            { name: 'Checkers', status: 'Coming soon', color: 'from-indigo-400 to-purple-500', active: false },
+            { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
+            { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
+            { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
+          ].map((g) => (
+            <button
+              key={g.name}
+              onClick={() => !g.active && alert('Coming soon')}
+              className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl`}
+            >
+              <div className="text-lg font-semibold">{g.name}</div>
+              <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
+              {g.active && <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">Play now</div>}
+            </button>
+          ))}
+        </div>
+
         <div className="flex gap-3 flex-wrap">
           {myActiveMatches.map((m) => (
             <button
