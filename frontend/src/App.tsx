@@ -23,6 +23,7 @@ import {
 } from './api';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 import { ChessBoard } from './chessBoard';
+import { CasualPlay } from './components/CasualPlay';
 
 interface Tournament {
   id: number;
@@ -351,11 +352,11 @@ function App() {
       )}
 
       {selected && (
-        <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Leaderboard</h2>
-            <span className="text-xs text-slate-400">Tournament #{selected}</span>
-          </div>
+      <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold">Leaderboard</h2>
+          <span className="text-xs text-slate-400">Tournament #{selected}</span>
+        </div>
           <div className="space-y-2">
             {board.map((r, idx) => (
               <div key={r.id} className="flex justify-between items-center rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
@@ -406,6 +407,8 @@ function App() {
           </div>
         )}
       </section>
+
+      <CasualPlay onMatchOpen={(id) => openMatch(id)} />
 
       <section className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-indigo-500/10 space-y-4">
         <div className="flex items-center justify-between">

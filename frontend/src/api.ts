@@ -104,4 +104,14 @@ export async function move(matchId: number, body: { from: string; to: string; pr
   return data;
 }
 
+export async function createCasual() {
+  const { data } = await api.post('/casual/create');
+  return data as { code: string; match: any };
+}
+
+export async function joinCasual(code: string) {
+  const { data } = await api.post('/casual/join', { code });
+  return data as { match: any };
+}
+
 export default api;
