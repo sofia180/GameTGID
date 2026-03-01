@@ -470,6 +470,7 @@ function App() {
             {[
               { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
               { name: 'Checkers', status: 'Coming soon', color: 'from-indigo-400 to-purple-500', active: false },
+              { name: 'Battleship', status: 'Coming soon', color: 'from-blue-400 to-sky-500', active: false },
               { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
               { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
               { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
