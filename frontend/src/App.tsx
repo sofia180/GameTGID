@@ -180,6 +180,16 @@ function App() {
     }
   }
 
+  function safeState(match: any) {
+    if (!match?.state) return null;
+    try {
+      if (typeof match.state === 'string') return JSON.parse(match.state);
+      return match.state;
+    } catch {
+      return null;
+    }
+  }
+
   async function loadLeaderboard(id: number) {
     const lb = await leaderboard(id);
     setBoard(lb);
@@ -464,12 +474,12 @@ function App() {
           ))}
           {!myActiveMatches.length && <span className="text-sm text-slate-500">No active matches yet</span>}
         </div>
-        {currentMatch && currentFen && currentMatch.game_type === 'chess' && (
+        {currentMatch && currentMatch.game_type === 'chess' && (
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <ChessBoard
-              fen={currentFen}
+              fen={currentFen || currentMatch.state || ''}
               myColor={currentMatch.player1 === me?.id ? 'w' : 'b'}
-              turn={currentFen.includes(' w ') ? 'w' : 'b'}
+              turn={(currentFen || currentMatch.state || '').includes(' w ') ? 'w' : 'b'}
               onMove={handleMove}
             />
             <div className="text-sm text-slate-300 space-y-2">
@@ -482,21 +492,21 @@ function App() {
           </div>
         )}
 
-        {currentMatch && currentMatch.game_type === 'checkers' && currentMatch.state && (
+        {currentMatch && currentMatch.game_type === 'checkers' && safeState(currentMatch) && (
           <div className="flex flex-col md:flex-row gap-4 items-start">
-            <CheckersBoard state={JSON.parse(currentMatch.state)} onMove={handleCheckersMove} isMyTurn={(currentMatch.player1 === me?.id && JSON.parse(currentMatch.state).turn === 'p1') || (currentMatch.player2 === me?.id && JSON.parse(currentMatch.state).turn === 'p2')} />
+            <CheckersBoard state={safeState(currentMatch)} onMove={handleCheckersMove} isMyTurn={(currentMatch.player1 === me?.id && safeState(currentMatch).turn === 'p1') || (currentMatch.player2 === me?.id && safeState(currentMatch).turn === 'p2')} />
             <div className="text-sm text-slate-300 space-y-2">
               <div>Match #{currentMatch.id} · {currentMatch.status}</div>
-              <div>Turn: {JSON.parse(currentMatch.state).turn === 'p1' ? 'White' : 'Black'}</div>
+              <div>Turn: {safeState(currentMatch).turn === 'p1' ? 'White' : 'Black'}</div>
             </div>
           </div>
         )}
 
-        {currentMatch && currentMatch.game_type === 'battleship' && currentMatch.state && (
+        {currentMatch && currentMatch.game_type === 'battleship' && safeState(currentMatch) && (
           <BattleshipBoard
-            state={JSON.parse(currentMatch.state)}
+            state={safeState(currentMatch)}
             me={currentMatch.player1 === me?.id ? 'p1' : 'p2'}
-            isMyTurn={(currentMatch.player1 === me?.id && JSON.parse(currentMatch.state).turn === 'p1') || (currentMatch.player2 === me?.id && JSON.parse(currentMatch.state).turn === 'p2')}
+            isMyTurn={(currentMatch.player1 === me?.id && safeState(currentMatch).turn === 'p1') || (currentMatch.player2 === me?.id && safeState(currentMatch).turn === 'p2')}
             onShoot={handleBattleShot}
           />
         )}
