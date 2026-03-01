@@ -412,9 +412,20 @@ function App() {
       {tab === 'play' && (
       <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">My matches</h3>
+          <div className="flex items-center gap-2">
+            <button className="text-xs text-emerald-300 underline" onClick={() => setTab('tournaments')}>← Back to tournaments</button>
+            <h3 className="font-semibold">Play zone</h3>
+          </div>
           <button className="text-xs text-emerald-300" onClick={loadMyMatches}>Refresh</button>
         </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-200 space-y-1">
+          <div className="font-semibold text-white">How to play (chess rooms)</div>
+          <p>1) Tap “Create room” to get an invite code.</p>
+          <p>2) Send the code to a friend, they join via “Join by code”.</p>
+          <p>3) Match appears in “My matches” — move pieces on the board. White = creator.</p>
+        </div>
+
         <div className="flex gap-3 flex-wrap">
           {myActiveMatches.map((m) => (
             <button
@@ -425,7 +436,7 @@ function App() {
               #{m.id} {m.game_type} ({m.status})
             </button>
           ))}
-          {!myActiveMatches.length && <span className="text-sm text-slate-500">Нет активных матчей</span>}
+          {!myActiveMatches.length && <span className="text-sm text-slate-500">No active matches yet</span>}
         </div>
         {currentMatch && currentFen && currentMatch.game_type === 'chess' && (
           <div className="flex flex-col md:flex-row gap-4 items-start">
