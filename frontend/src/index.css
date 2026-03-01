@@ -12,3 +12,24 @@ body {
   background: radial-gradient(circle at 20% 20%, #0f172a, #0b1224 35%, #070c1a 70%), radial-gradient(circle at 80% 10%, #0a1a2f, transparent 40%), #050910;
   color: #e2e8f0;
 }
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 18s linear infinite;
+}
+@keyframes pulse-slow {
+  0%,100% { transform: scale(1); box-shadow: 0 0 10px rgba(16,185,129,0.4);} 
+  50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(16,185,129,0.6);} 
+}
+.animate-pulse-slow { animation: pulse-slow 2.5s ease-in-out infinite; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+.animate-fade-in { animation: fade-in 0.4s ease forwards; }
+@keyframes pop { 0% { transform: scale(0.9);} 70% { transform: scale(1.05);} 100% { transform: scale(1);} }
+.animate-pop { animation: pop 0.35s ease; }
+.btn-neo { transition: transform 0.15s ease, box-shadow 0.2s ease; }
+.btn-neo:hover { transform: translateY(-1px) scale(1.01); box-shadow: 0 10px 30px rgba(16,185,129,0.35); }
+.btn-neo:active { transform: translateY(0) scale(0.99); }
+.animate-number { transition: all 0.4s ease; }

@@ -24,6 +24,11 @@ import {
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 import { ChessBoard } from './chessBoard';
 import { CasualPlay } from './components/CasualPlay';
+import LiveTicker from './components/LiveTicker';
+import HeroBlock from './components/HeroBlock';
+import GlobalActivity from './components/GlobalActivity';
+import InvitePanel from './components/InvitePanel';
+import BigWinToast from './components/BigWinToast';
 
 interface Tournament {
   id: number;
@@ -52,6 +57,7 @@ function App() {
   const [currentMatch, setCurrentMatch] = useState<any | null>(null);
   const [currentFen, setCurrentFen] = useState<string>('');
   const [tab, setTab] = useState<'play' | 'tournaments' | 'admin'>('tournaments');
+  const [bigWin, setBigWin] = useState<{ amount: number; user: string } | null>(null);
   const initData = useMemo(() => WebApp.initData || '', []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
@@ -59,6 +65,18 @@ function App() {
   useEffect(() => {
     if (tonAddress) setFromAddress(tonAddress);
   }, [tonAddress]);
+
+  // Random mega win effect every ~22s
+  useEffect(() => {
+    const id = setInterval(() => {
+      const users = ['Alex', 'Maria', 'Kaito', 'Lena', 'Ravi', 'Zoe'];
+      const user = users[Math.floor(Math.random() * users.length)];
+      const amount = Math.floor(Math.random() * 180) + 20;
+      setBigWin({ amount, user });
+      setTimeout(() => setBigWin(null), 3600);
+    }, 22000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     WebApp.ready();
@@ -247,6 +265,9 @@ function App() {
 
   return (
     <div className="min-h-screen p-4 space-y-4">
+      <LiveTicker />
+      <BigWinToast win={bigWin} />
+
       <header className="rounded-xl border border-slate-800/60 bg-slate-900/70 backdrop-blur px-4 py-3 flex items-center justify-between shadow-lg shadow-emerald-500/5">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">GameTGID</p>
@@ -277,6 +298,7 @@ function App() {
       {tab === 'tournaments' && (
       <section className="grid gap-3 md:grid-cols-3">
         <div className="md:col-span-2 rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
+          <HeroBlock />
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Tournaments</h2>
             <div className="flex gap-2 text-xs">
@@ -534,6 +556,13 @@ function App() {
           </div>
         )}
       </section>
+      )}
+
+      {tab === 'tournaments' && (
+        <div className="grid gap-3 md:grid-cols-2">
+          <InvitePanel />
+          <GlobalActivity />
+        </div>
       )}
     </div>
   );

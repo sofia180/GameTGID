@@ -114,4 +114,10 @@ export async function joinCasual(code: string) {
   return data as { match: any };
 }
 
+// placeholder for future match start screen data
+export async function fetchMatchIntro(matchId: number) {
+  const { data } = await api.get(`/matches/${matchId}/state`);
+  return data;
+}
+
 export default api;
