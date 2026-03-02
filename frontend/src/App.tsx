@@ -129,9 +129,9 @@ function App() {
 
   async function loadMyMatches() {
     try {
-      const { matches } = await myMatches();
-      setMyActiveMatches(matches);
-      if (matches.length && !currentMatch) {
+      const matches = await myMatches();
+      setMyActiveMatches(matches || []);
+      if (matches?.length && !currentMatch) {
         await openMatch(matches[0].id);
       }
     } catch (err) {
