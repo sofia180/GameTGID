@@ -13,9 +13,20 @@ export async function telegramAuth(req: AuthedRequest, res: Response, next: Next
   const { valid, data } = validateInitData(initData || '');
   if (!valid || !data) {
     if (env.allowInsecureDev) {
-      req.user = { id: 1, telegram_id: 1, username: 'dev' };
-      req.initData = {};
-      return next();
+      try {
+        const { rows } = await pool.query(
+          `INSERT INTO users (telegram_id, username)
+           VALUES ($1, $2)
+           ON CONFLICT (telegram_id) DO UPDATE SET username=EXCLUDED.username
+           RETURNING id, telegram_id, username`,
+          [1, 'dev']
+        );
+        req.user = rows[0];
+        req.initData = {};
+        return next();
+      } catch (e) {
+        return res.status(500).json({ error: 'Dev auth failed', detail: (e as Error).message });
+      }
     }
     return res.status(401).json({ error: 'Invalid Telegram signature' });
   }
