@@ -58,9 +58,10 @@ function App() {
   const [myActiveMatches, setMyActiveMatches] = useState<any[]>([]);
   const [currentMatch, setCurrentMatch] = useState<any | null>(null);
   const [currentFen, setCurrentFen] = useState<string>('');
-  const [tab, setTab] = useState<'play' | 'tournaments' | 'games' | 'admin'>('tournaments');
+  const [tab, setTab] = useState<'play' | 'tournaments' | 'admin'>('tournaments');
   const [bigWin, setBigWin] = useState<{ amount: number; user: string } | null>(null);
   const [quickLoading, setQuickLoading] = useState(false);
+  const [gameError, setGameError] = useState<string | null>(null);
   const initData = useMemo(() => {
     const raw = WebApp.initData || '';
     if (raw) return raw;
@@ -190,11 +191,19 @@ function App() {
   async function quickPlay(game: string) {
     const gameType = game.toLowerCase().includes('chess') ? 'chess' : game.toLowerCase().includes('checkers') ? 'checkers' : game.toLowerCase().includes('battle') ? 'battleship' : 'chess';
     setQuickLoading(true);
+    setGameError(null);
     try {
+      // если уже есть активный матч этого типа — открываем его (поведение как у Gamee)
+      const existing = myActiveMatches.find((m) => m.game_type === gameType && m.status !== 'completed');
+      if (existing) {
+        setTab('play');
+        await openMatch(existing.id);
+        return;
+      }
       const { match } = await createCasual(gameType);
-      setTab('play');
       await loadMyMatches();
       await openMatch(match.id);
+      setTab('play');
     } catch (err) {
       const msg =
         // @ts-ignore
@@ -202,7 +211,7 @@ function App() {
           ? 'Auth error: Telegram initData not accepted. Open via the bot, or temporarily set ALLOW_INSECURE_DEV=true on backend & VITE_ALLOW_INSECURE_DEV=true on frontend.'
           // @ts-ignore
           : err?.response?.data?.error || 'Cannot start quick match. Please reconnect Telegram WebApp or reload.');
-      alert(msg);
+      setGameError(msg);
       console.error('quickPlay failed', err);
     } finally {
       setQuickLoading(false);
@@ -349,13 +358,13 @@ function App() {
       </header>
 
       <div className="flex gap-2">
-        {['tournaments', 'play', 'games', 'admin'].map((t) => (
+        {['tournaments', 'play', 'admin'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
             className={`px-3 py-2 rounded-lg border text-sm ${tab === t ? 'bg-emerald-400 text-black border-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-200'}`}
           >
-            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : t === 'games' ? 'Games' : 'Admin'}
+            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : 'Admin'}
           </button>
         ))}
       </div>
@@ -475,20 +484,55 @@ function App() {
       )}
 
       {tab === 'play' && (
-      <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-3">
+      <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button className="text-xs text-emerald-300 underline" onClick={() => setTab('tournaments')}>← Back to tournaments</button>
-            <h3 className="font-semibold">Play zone</h3>
+          <div>
+            <h3 className="font-semibold text-white">Play hub</h3>
+            <p className="text-xs text-slate-400">Выбирай игру → создавай матч → играй прямо здесь</p>
           </div>
           <button className="text-xs text-emerald-300" onClick={loadMyMatches}>Refresh</button>
         </div>
 
+        {gameError && (
+          <div className="rounded-lg border border-amber-400/60 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+            {gameError}
+          </div>
+        )}
+
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
+            { name: 'Checkers', status: 'Live', color: 'from-indigo-400 to-purple-500', active: true },
+            { name: 'Battleship', status: 'Live', color: 'from-blue-400 to-sky-500', active: true },
+            { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
+            { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
+            { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
+          ].map((g) => (
+            <button
+              key={g.name}
+              onClick={() => g.active ? quickPlay(g.name) : alert('Coming soon')}
+              disabled={quickLoading && g.active}
+              className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl disabled:opacity-60`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold">{g.name}</div>
+                {g.active && <span className="text-[11px] bg-black/30 px-2 py-0.5 rounded-full">Live</span>}
+              </div>
+              <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
+              {g.active && (
+                <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">
+                  {quickLoading ? 'Starting…' : 'Play now'}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-200 space-y-1">
-          <div className="font-semibold text-white">How to play (chess rooms)</div>
-          <p>1) Tap “Create room” to get an invite code.</p>
-          <p>2) Send the code to a friend, they join via “Join by code”.</p>
-          <p>3) Match appears in “My matches” — move pieces on the board. White = creator.</p>
+          <div className="font-semibold text-white">Как играть</div>
+          <p>1) Тапни игру “Play now” — создастся матч.</p>
+          <p>2) Выбери матч в “Мои матчи” ниже и делай ходы на доске.</p>
+          <p>3) Белыми ходит создатель комнаты.</p>
         </div>
 
         <div className="flex gap-3 flex-wrap">
@@ -496,26 +540,19 @@ function App() {
             <button
               key={m.id}
               onClick={() => openMatch(m.id)}
-              className={`px-3 py-2 rounded-lg border ${currentMatch?.id === m.id ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-700 bg-slate-900'}`}
+              className={`px-3 py-2 rounded-lg border text-sm ${currentMatch?.id === m.id ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-700 bg-slate-900'}`}
             >
               #{m.id} {m.game_type} ({m.status})
             </button>
           ))}
           {!myActiveMatches.length && (
             <div className="flex flex-col gap-2 text-sm text-slate-300 bg-slate-800/70 border border-slate-700 rounded-xl p-3 max-w-md">
-              <div className="text-white font-semibold">No matches yet</div>
-              <p>Create a casual room or join a tournament to see matches here.</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button className="bg-emerald-400 text-black rounded-lg px-3 py-2 font-semibold" onClick={() => setTab('games')}>
-                  Explore games
-                </button>
-                <button className="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-2" onClick={() => setTab('tournaments')}>
-                  Go to tournaments
-                </button>
-              </div>
+              <div className="text-white font-semibold">Нет матчей</div>
+              <p>Нажми “Play now” над карточкой игры, чтобы создать быстрый матч.</p>
             </div>
           )}
         </div>
+
         {currentMatch && currentMatch.game_type === 'chess' && (
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <ChessBoard
@@ -552,43 +589,9 @@ function App() {
             onShoot={handleBattleShot}
           />
         )}
+
+        <CasualPlay onMatchOpen={(id) => openMatch(id)} />
       </section>
-      )}
-
-      {tab === 'play' && <CasualPlay onMatchOpen={(id) => openMatch(id)} />}
-
-      {tab === 'games' && (
-        <section className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-indigo-500/10 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="text-white text-lg font-semibold">Games hub</div>
-            <button className="text-xs text-emerald-300 underline" onClick={() => setTab('tournaments')}>← Back to tournaments</button>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {[
-              { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
-              { name: 'Checkers', status: 'Live', color: 'from-indigo-400 to-purple-500', active: true },
-              { name: 'Battleship', status: 'Live', color: 'from-blue-400 to-sky-500', active: true },
-              { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
-              { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
-              { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
-            ].map((g) => (
-              <button
-                key={g.name}
-                onClick={() => g.active ? quickPlay(g.name) : alert('Coming soon')}
-                disabled={quickLoading && g.active}
-                className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl disabled:opacity-60`}
-              >
-                <div className="text-lg font-semibold">{g.name}</div>
-                <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
-                {g.active && (
-                  <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">
-                    {quickLoading ? 'Starting…' : 'Play now'}
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        </section>
       )}
 
       {tab === 'admin' && (
