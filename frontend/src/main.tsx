@@ -4,17 +4,15 @@ import './index.css';
 import App from './App';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
-const manifestUrl = import.meta.env.VITE_TON_MANIFEST_URL;
-const tonEnabled = !!manifestUrl && import.meta.env.VITE_DISABLE_TON !== 'true';
+// Fallback manifest so dev preview works without env vars
+const manifestUrl =
+  import.meta.env.VITE_TON_MANIFEST_URL ||
+  'https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {tonEnabled ? (
-      <TonConnectUIProvider manifestUrl={manifestUrl!}>
-        <App />
-      </TonConnectUIProvider>
-    ) : (
+    <TonConnectUIProvider manifestUrl={manifestUrl}>
       <App />
-    )}
+    </TonConnectUIProvider>
   </React.StrictMode>
 );
