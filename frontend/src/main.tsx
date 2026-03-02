@@ -4,14 +4,17 @@ import './index.css';
 import App from './App';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
-const manifestUrl =
-  import.meta.env.VITE_TON_MANIFEST_URL ||
-  'https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json';
+const manifestUrl = import.meta.env.VITE_TON_MANIFEST_URL;
+const tonEnabled = !!manifestUrl && import.meta.env.VITE_DISABLE_TON !== 'true';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
+    {tonEnabled ? (
+      <TonConnectUIProvider manifestUrl={manifestUrl!}>
+        <App />
+      </TonConnectUIProvider>
+    ) : (
       <App />
-    </TonConnectUIProvider>
+    )}
   </React.StrictMode>
 );
