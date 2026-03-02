@@ -347,6 +347,9 @@ function App() {
     }
   }
 
+  const safeTournaments = Array.isArray(tournaments) ? tournaments : [];
+  const safeGames = Array.isArray(games) ? games : [];
+
   return (
     <div className="min-h-screen p-4 space-y-4">
       <LiveTicker />
@@ -521,18 +524,18 @@ function App() {
           </div>
         )}
 
-        <PortalStats stats={{ online: 12450, winnings: 58200, tournaments: 18, biggest: 840 }} />
+        <PortalStats stats={{ online: 12450, winnings: 58200, tournaments: safeTournaments.length || 18, biggest: 840 }} />
 
         <GameSection
           title="Featured"
-          games={games.filter((g) => g.tags?.includes('featured'))}
+          games={safeGames.filter((g) => g.tags?.includes('featured'))}
           loading={quickLoading}
           onPlay={(g) => quickPlay(g.name)}
         />
 
         <GameSection
           title="Trending"
-          games={games.filter((g) => g.tags?.includes('trending'))}
+          games={safeGames.filter((g) => g.tags?.includes('trending'))}
           loading={quickLoading}
           onPlay={(g) => quickPlay(g.name)}
         />
