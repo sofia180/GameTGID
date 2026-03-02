@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { validateInitData } from '../utils/telegram.js';
 import { pool } from '../db/pool.js';
+import { env } from '../config/env.js';
 
 export interface AuthedRequest extends Request {
   user?: { id: number; telegram_id: number; username?: string };
@@ -10,7 +11,14 @@ export interface AuthedRequest extends Request {
 export async function telegramAuth(req: AuthedRequest, res: Response, next: NextFunction) {
   const initData = req.header('x-telegram-init-data');
   const { valid, data } = validateInitData(initData || '');
-  if (!valid || !data) return res.status(401).json({ error: 'Invalid Telegram signature' });
+  if (!valid || !data) {
+    if (env.allowInsecureDev) {
+      req.user = { id: 1, telegram_id: 1, username: 'dev' };
+      req.initData = {};
+      return next();
+    }
+    return res.status(401).json({ error: 'Invalid Telegram signature' });
+  }
 
   try {
     const userObj = data.user ? JSON.parse(data.user) : null;

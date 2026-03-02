@@ -21,7 +21,8 @@ export const env = {
   allowedOrigin: process.env.ALLOWED_ORIGIN || '*',
   adminApiKey: process.env.ADMIN_API_KEY || 'change-me',
   wsSecret: process.env.WS_SECRET || 'ws-secret',
-  tonPollIntervalMs: parseInt(process.env.TON_POLL_INTERVAL_MS || '30000', 10)
+  tonPollIntervalMs: parseInt(process.env.TON_POLL_INTERVAL_MS || '30000', 10),
+  allowInsecureDev: process.env.ALLOW_INSECURE_DEV === 'true'
 };
 
 if (!env.databaseUrl) {
