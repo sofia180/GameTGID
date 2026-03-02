@@ -61,10 +61,21 @@ function App() {
   const [myActiveMatches, setMyActiveMatches] = useState<any[]>([]);
   const [currentMatch, setCurrentMatch] = useState<any | null>(null);
   const [currentFen, setCurrentFen] = useState<string>('');
-  const [tab, setTab] = useState<'play' | 'tournaments' | 'admin'>('tournaments');
+  const [tab, setTab] = useState<'tournaments' | 'hub' | 'play' | 'admin'>('tournaments');
   const [bigWin, setBigWin] = useState<{ amount: number; user: string } | null>(null);
   const [quickLoading, setQuickLoading] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
+  const [hubFilter, setHubFilter] = useState<'all' | 'strategy' | 'reaction' | 'skill' | 'arcade' | 'duel'>('all');
+  const defaultGames = useMemo(
+    () => [
+      { id: 1, name: 'Blitz Chess', type: 'strategy', tags: ['featured', 'trending'], players_online: 342, prize_pool: 250, difficulty: 'Medium' },
+      { id: 2, name: 'Reaction Duel', type: 'reaction', tags: ['featured'], players_online: 290, prize_pool: 120, difficulty: 'Easy' },
+      { id: 3, name: 'Quick Strategy Battle', type: 'strategy', tags: ['trending'], players_online: 180, prize_pool: 180, difficulty: 'Hard' },
+      { id: 4, name: 'Arcade Score Challenge', type: 'arcade', tags: ['new'], players_online: 210, prize_pool: 90, difficulty: 'Medium' },
+      { id: 5, name: 'Duel Rush', type: 'duel', tags: ['trending'], players_online: 150, prize_pool: 110, difficulty: 'Medium' }
+    ],
+    []
+  );
   const initData = useMemo(() => {
     const raw = WebApp.initData || '';
     if (raw) return raw;
@@ -105,12 +116,14 @@ function App() {
       try {
         const res = await fetch('/api/games');
         const data = await res.json();
-        setGames(data.games || []);
+        const fetched = data.games || [];
+        setGames(fetched.length ? fetched : defaultGames);
       } catch (err) {
         console.warn('games fetch failed', err);
+        setGames(defaultGames);
       }
     })();
-  }, [initData]);
+  }, [initData, defaultGames]);
 
   useEffect(() => {
     let ws: WebSocket | null = null;
@@ -378,7 +391,7 @@ function App() {
       </header>
 
         <div className="flex gap-2">
-        {['tournaments', 'play', 'admin'].map((t) => (
+        {['tournaments', 'hub', 'play', 'admin'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
@@ -388,7 +401,7 @@ function App() {
                 : 'bg-slate-900/70 border-slate-800 text-slate-200 hover:border-white/20'
             }`}
           >
-            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : 'Admin'}
+            {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : t === 'hub' ? 'Game Hub' : 'Admin'}
           </button>
         ))}
       </div>
@@ -531,6 +544,64 @@ function App() {
           >
             Я оплатил(а)
           </button>
+        </section>
+      )}
+
+      {tab === 'hub' && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200">Game Hub</p>
+              <h2 className="text-2xl font-[var(--font-display)] text-white">Instant games, tournaments, duels</h2>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {['all', 'strategy', 'reaction', 'skill', 'arcade', 'duel'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setHubFilter(cat as any)}
+                  className={`rounded-full border px-3 py-1 ${
+                    hubFilter === cat ? 'border-[#3ad3ff] text-[#3ad3ff] bg-white/5' : 'border-white/10 text-slate-300'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {(hubFilter === 'all'
+              ? safeGames
+              : safeGames.filter((g) => (g.type || '').includes(hubFilter))).map((g) => (
+              <div key={g.id} className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-neon">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#9a4dff]/12 via-[#3ad3ff]/10 to-[#ff4fbf]/10" />
+                <div className="relative z-10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg font-[var(--font-display)] text-white">{g.name}</p>
+                    <span className="text-[11px] rounded-full bg-white/10 px-2 py-1 text-cyan-200">{g.type || 'arcade'}</span>
+                  </div>
+                  <div className="text-xs text-slate-300 flex gap-3 flex-wrap">
+                    {g.players_online !== undefined && <span>👥 {g.players_online} online</span>}
+                    {g.difficulty && <span>⚡ {g.difficulty}</span>}
+                    {g.prize_pool && <span>🏆 ${g.prize_pool}</span>}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      className="flex-1 bg-gradient-to-r from-[#9a4dff] via-[#3ad3ff] to-[#37fff2] text-black px-3 py-2 rounded-lg font-semibold shadow-neon"
+                      onClick={() => quickPlay(g.name)}
+                    >
+                      Play now
+                    </button>
+                    <button
+                      className="flex-1 bg-white/5 text-slate-100 px-3 py-2 rounded-lg border border-white/10 hover:border-white/30"
+                      onClick={() => setTab('tournaments')}
+                    >
+                      Tournaments
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
