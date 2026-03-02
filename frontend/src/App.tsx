@@ -119,9 +119,7 @@ function App() {
         console.warn('auth/me failed (possibly dev mode). Continuing with UI.', err);
       }
       try {
-        const res = await fetch('/api/games');
-        const data = await res.json();
-        const fetched = data.games || [];
+        const fetched = await fetchGamesRegistry();
         setGames(fetched.length ? fetched : defaultGames);
       } catch (err) {
         console.warn('games fetch failed', err);
@@ -133,6 +131,7 @@ function App() {
   useEffect(() => {
     let ws: WebSocket | null = null;
     (async () => {
+      if (!import.meta.env.VITE_WS_URL) return; // skip ws in dev without config
       try {
         const token = await fetchSocketToken();
         ws = new WebSocket(`${import.meta.env.VITE_WS_URL}?token=${token}`);

@@ -154,4 +154,18 @@ export async function fetchMatchIntro(matchId: number) {
   return data;
 }
 
+export async function fetchGamesRegistry() {
+  if (DEV_NO_API) {
+    return mock([
+      { id: 1, name: 'Blitz Chess', type: 'strategy', tags: ['featured', 'trending'], players_online: 342, prize_pool: 250, difficulty: 'Medium' },
+      { id: 2, name: 'Reaction Duel', type: 'reaction', tags: ['featured'], players_online: 290, prize_pool: 120, difficulty: 'Easy' },
+      { id: 3, name: 'Quick Strategy Battle', type: 'strategy', tags: ['trending'], players_online: 180, prize_pool: 180, difficulty: 'Hard' },
+      { id: 4, name: 'Arcade Score Challenge', type: 'arcade', tags: ['new'], players_online: 210, prize_pool: 90, difficulty: 'Medium' },
+      { id: 5, name: 'Duel Rush', type: 'duel', tags: ['trending'], players_online: 150, prize_pool: 110, difficulty: 'Medium' }
+    ]);
+  }
+  const { data } = await api.get('/games');
+  return data.games || [];
+}
+
 export default api;
