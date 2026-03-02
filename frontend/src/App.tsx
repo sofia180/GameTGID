@@ -31,6 +31,8 @@ import HeroBlock from './components/HeroBlock';
 import GlobalActivity from './components/GlobalActivity';
 import InvitePanel from './components/InvitePanel';
 import BigWinToast from './components/BigWinToast';
+import PortalStats from './components/PortalStats';
+import GameSection from './components/GameSection';
 
 interface Tournament {
   id: number;
@@ -43,6 +45,7 @@ interface Tournament {
 function App() {
   const [me, setMe] = useState<any>();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [games, setGames] = useState<any[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [board, setBoard] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,6 +101,13 @@ function App() {
         await loadMyMatches();
       } catch (err) {
         console.warn('auth/me failed (possibly dev mode). Continuing with UI.', err);
+      }
+      try {
+        const res = await fetch('/api/games');
+        const data = await res.json();
+        setGames(data.games || []);
+      } catch (err) {
+        console.warn('games fetch failed', err);
       }
     })();
   }, [initData]);
@@ -357,7 +367,7 @@ function App() {
         )}
       </header>
 
-      <div className="flex gap-2">
+        <div className="flex gap-2">
         {['tournaments', 'play', 'admin'].map((t) => (
           <button
             key={t}
@@ -499,34 +509,21 @@ function App() {
           </div>
         )}
 
-        <div className="grid gap-3 md:grid-cols-3">
-          {[
-            { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
-            { name: 'Checkers', status: 'Live', color: 'from-indigo-400 to-purple-500', active: true },
-            { name: 'Battleship', status: 'Live', color: 'from-blue-400 to-sky-500', active: true },
-            { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
-            { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
-            { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
-          ].map((g) => (
-            <button
-              key={g.name}
-              onClick={() => g.active ? quickPlay(g.name) : alert('Coming soon')}
-              disabled={quickLoading && g.active}
-              className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl disabled:opacity-60`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="text-lg font-semibold">{g.name}</div>
-                {g.active && <span className="text-[11px] bg-black/30 px-2 py-0.5 rounded-full">Live</span>}
-              </div>
-              <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
-              {g.active && (
-                <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">
-                  {quickLoading ? 'Starting…' : 'Play now'}
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
+        <PortalStats stats={{ online: 12450, winnings: 58200, tournaments: 18, biggest: 840 }} />
+
+        <GameSection
+          title="Featured"
+          games={games.filter((g) => g.tags?.includes('featured'))}
+          loading={quickLoading}
+          onPlay={(g) => quickPlay(g.name)}
+        />
+
+        <GameSection
+          title="Trending"
+          games={games.filter((g) => g.tags?.includes('trending'))}
+          loading={quickLoading}
+          onPlay={(g) => quickPlay(g.name)}
+        />
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-200 space-y-1">
           <div className="font-semibold text-white">Как играть</div>

@@ -17,6 +17,7 @@ import { listParticipantsAdmin, listMatchesAdmin } from '../controllers/adminCon
 import { createRoom, getRoom } from '../controllers/roomController.js';
 import { myMatches, matchState, move } from '../controllers/matchPlayController.js';
 import { createCasual, joinCasual } from '../controllers/casualController.js';
+import { getGames } from '../controllers/gamesController.js';
 
 const router = Router();
 
@@ -43,6 +44,9 @@ router.get('/matches/:id/state', telegramAuth, matchState);
 router.post('/matches/:id/move', telegramAuth, move);
 router.post('/casual/create', telegramAuth, createCasual);
 router.post('/casual/join', telegramAuth, joinCasual);
+
+// Games registry (temporary in-memory for fast UI)
+router.get('/games', getGames);
 
 router.post('/payments/intent', telegramAuth, paymentIntent);
 router.post('/payments/verify', telegramAuth, paymentVerify);
