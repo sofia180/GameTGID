@@ -196,8 +196,14 @@ function App() {
       await loadMyMatches();
       await openMatch(match.id);
     } catch (err) {
-      alert('Cannot start quick match. Please reconnect Telegram WebApp or reload.');
-      console.error(err);
+      const msg =
+        // @ts-ignore
+        (err?.response?.status === 401
+          ? 'Auth error: Telegram initData not accepted. Open via the bot, or temporarily set ALLOW_INSECURE_DEV=true on backend & VITE_ALLOW_INSECURE_DEV=true on frontend.'
+          // @ts-ignore
+          : err?.response?.data?.error || 'Cannot start quick match. Please reconnect Telegram WebApp or reload.');
+      alert(msg);
+      console.error('quickPlay failed', err);
     } finally {
       setQuickLoading(false);
     }
