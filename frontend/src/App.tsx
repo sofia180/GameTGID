@@ -352,15 +352,15 @@ function App() {
       <LiveTicker />
       <BigWinToast win={bigWin} />
 
-      <header className="rounded-xl border border-slate-800/60 bg-slate-900/70 backdrop-blur px-4 py-3 flex items-center justify-between shadow-lg shadow-emerald-500/5">
+      <header className="rounded-2xl border border-white/10 bg-slate-900/70 backdrop-blur px-4 py-3 flex items-center justify-between shadow-neon panel">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">GameTGID</p>
-          <h1 className="text-xl font-semibold">Telegram Tournaments Hub</h1>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-cyan-200">GameTGID</p>
+          <h1 className="text-xl font-semibold text-white">Telegram Tournaments Hub</h1>
           <p className="text-sm text-slate-400">Chess · Checkers · Arcade · Dota2 · CS</p>
         </div>
         {me && (
           <div className="text-right text-sm space-y-1">
-            <div className="text-emerald-300 font-medium">@{me.username || me.telegram_id}</div>
+            <div className="text-cyan-200 font-medium">@{me.username || me.telegram_id}</div>
             <div className="text-slate-400">Balance: {me.balance ?? 0}</div>
             <div className="flex justify-end"><TonConnectButton /></div>
           </div>
@@ -372,7 +372,11 @@ function App() {
           <button
             key={t}
             onClick={() => setTab(t as any)}
-            className={`px-3 py-2 rounded-lg border text-sm ${tab === t ? 'bg-emerald-400 text-black border-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-200'}`}
+            className={`px-3 py-2 rounded-lg border text-sm transition ${
+              tab === t
+                ? 'bg-gradient-to-r from-[#9a4dff] via-[#3ad3ff] to-[#37fff2] text-black border-white/20 shadow-neon'
+                : 'bg-slate-900/70 border-slate-800 text-slate-200 hover:border-white/20'
+            }`}
           >
             {t === 'play' ? 'Play' : t === 'tournaments' ? 'Tournaments' : 'Admin'}
           </button>
@@ -381,7 +385,7 @@ function App() {
 
       {tab === 'tournaments' && (
       <section className="grid gap-3 md:grid-cols-3">
-        <div className="md:col-span-2 rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5">
+        <div className="md:col-span-2 rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-neon panel">
           <HeroBlock />
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Tournaments</h2>
@@ -390,7 +394,9 @@ function App() {
                 <button
                   key={sym}
                   onClick={() => setToken(sym)}
-                  className={`px-3 py-1 rounded-full border ${token === sym ? 'bg-emerald-400 text-black border-emerald-300' : 'border-slate-700 text-slate-300'}`}
+                  className={`px-3 py-1 rounded-full border transition ${
+                    token === sym ? 'bg-[#3ad3ff] text-black border-white/20 shadow-neon' : 'border-white/10 text-slate-300 hover:border-white/30'
+                  }`}
                 >
                   {sym}
                 </button>
@@ -399,7 +405,8 @@ function App() {
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             {tournaments.map((t) => (
-              <div key={t.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 flex flex-col gap-2">
+              <div key={t.id} className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 p-4 flex flex-col gap-2 shadow-purple">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#9a4dff]/14 via-[#3ad3ff]/12 to-[#37fff2]/14" />
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{t.title}</div>
                   <span className="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-200">{t.game_type}</span>
@@ -407,13 +414,13 @@ function App() {
                 <div className="text-xs text-slate-400">Entry: {t.entry_fee} {token} · Prize: {t.prize_pool} {token}</div>
                 <div className="flex gap-2">
                   <button
-                    className="flex-1 bg-slate-800 text-slate-100 px-3 py-2 rounded-lg border border-slate-700"
+                    className="flex-1 bg-white/5 text-slate-100 px-3 py-2 rounded-lg border border-white/10 hover:border-white/30"
                     onClick={() => loadLeaderboard(t.id)}
                   >
                     View
                   </button>
                   <button
-                    className="flex-1 bg-emerald-400 text-black px-3 py-2 rounded-lg font-semibold disabled:opacity-50"
+                    className="flex-1 bg-gradient-to-r from-[#9a4dff] via-[#3ad3ff] to-[#37fff2] text-black px-3 py-2 rounded-lg font-semibold disabled:opacity-50 shadow-neon"
                     onClick={() => handleJoin(t)}
                     disabled={loading}
                   >
@@ -425,7 +432,7 @@ function App() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-lg shadow-emerald-500/5 space-y-3">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-neon panel space-y-3">
           <h3 className="font-semibold">Quick Steps</h3>
           <ol className="space-y-2 text-sm text-slate-300 list-decimal list-inside">
             <li>Выбери токен (TON/USDT/USDC)</li>

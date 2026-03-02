@@ -19,16 +19,19 @@ export default function GlobalActivity() {
   }, []);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-900/30">
-      <h3 className="font-semibold mb-2 text-white">Global joins</h3>
-      <div className="space-y-2 text-sm">
+    <div className="relative rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-purple panel">
+      <h3 className="font-semibold mb-2 text-white">Глобальные входы</h3>
+      <div className="grid grid-cols-2 gap-2 text-sm">
         {events.map((e, idx) => (
-          <div key={e.ts + idx} className="flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2 animate-fade-in">
+          <div
+            key={e.ts + idx}
+            className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 animate-fade-in border border-white/5"
+          >
             <span className="text-slate-100">🌍 {e.country}</span>
-            <span className="text-emerald-200">joined {e.game}</span>
+            <span className="text-cyan-200">+ {e.game}</span>
           </div>
         ))}
-        {!events.length && <div className="text-slate-500 text-sm">Waiting for players...</div>}
+        {!events.length && <div className="text-slate-500 text-sm col-span-2">Waiting for players...</div>}
       </div>
     </div>
   );

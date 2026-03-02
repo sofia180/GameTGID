@@ -26,14 +26,14 @@ export default function GameSection({ title, games, onPlay, loading }: { title: 
             animate={{ opacity: 1, y: 0, transition: { delay: idx * 0.02 } }}
             onClick={() => g.status === 'live' && onPlay(g)}
             disabled={loading || g.status !== 'live'}
-            className={`relative overflow-hidden rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950/80 p-3 text-left text-white shadow-lg shadow-slate-900/30 transition disabled:opacity-50`}
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 p-3 text-left text-white shadow-neon transition disabled:opacity-50"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 opacity-70" />
-            <div className="absolute -inset-px rounded-xl border border-white/10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#9a4dff]/15 via-[#3ad3ff]/12 to-[#ff4fbf]/15 opacity-80" />
+            <div className="absolute -inset-px rounded-2xl border border-white/10" />
             <div className="flex items-center justify-between gap-2">
               <div className="text-lg font-semibold drop-shadow">{g.name}</div>
               {g.status === 'live' ? (
-                <span className="text-[11px] bg-emerald-400 text-black px-2 py-0.5 rounded-full">Live</span>
+                <span className="text-[11px] bg-[#3ad3ff] text-black px-2 py-0.5 rounded-full animate-pulse-slow">Live</span>
               ) : (
                 <span className="text-[11px] bg-slate-700 text-slate-200 px-2 py-0.5 rounded-full">Coming</span>
               )}
@@ -43,10 +43,11 @@ export default function GameSection({ title, games, onPlay, loading }: { title: 
               {g.prize_pool !== undefined && <span>🏆 ${g.prize_pool}</span>}
               {g.difficulty && <span>⚡ {g.difficulty}</span>}
             </div>
-            <div className="mt-2 inline-flex items-center gap-2 text-xs">
-              <span className="px-3 py-1 rounded-lg bg-white/85 text-black font-semibold shadow">
+            <div className="mt-3 flex justify-between items-center">
+              <span className="px-3 py-1 rounded-lg bg-white/90 text-black font-semibold shadow">
                 {loading && g.status === 'live' ? 'Starting…' : g.status === 'live' ? 'Play now' : 'Soon'}
               </span>
+              <span className="text-[11px] text-cyan-200 uppercase tracking-[0.18em]">{g.tags?.join(' · ')}</span>
             </div>
           </motion.button>
         ))}

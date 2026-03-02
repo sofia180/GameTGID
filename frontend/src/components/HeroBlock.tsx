@@ -21,29 +21,30 @@ export default function HeroBlock() {
   const ss = String(countdown % 60).padStart(2, '0');
 
   return (
-    <div className="mb-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-900 border border-emerald-500/30 p-4 shadow-emerald-500/30 shadow-lg">
-      <div className="flex flex-wrap items-center gap-4 justify-between">
-        <div>
-          <p className="text-xs uppercase text-emerald-200 tracking-widest">Main Tournament</p>
-          <div className="text-3xl font-bold text-white flex items-baseline gap-2">
-            <span className="animate-number">${prize.toLocaleString()} </span>
-            <span className="text-sm text-emerald-200">Prize Pool</span>
+    <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-5 shadow-neon panel">
+      <div className="relative z-10 grid gap-4 md:grid-cols-5 items-center">
+        <div className="md:col-span-2 space-y-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-cyan-200">Главный турнир</p>
+          <div className="text-4xl font-bold text-white flex items-baseline gap-2 drop-shadow">
+            <span className="animate-number">${prize.toLocaleString()}</span>
+            <span className="text-sm text-cyan-200/90">Prize Pool</span>
           </div>
+          <p className="text-sm text-slate-300">Бустится в реальном времени. Присоединяйся и забери свою долю.</p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-slate-300">Countdown</p>
-          <div className="text-2xl font-semibold text-emerald-200 font-mono">{hh}:{mm}:{ss}</div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Countdown</p>
+          <div className="text-2xl font-semibold text-neon font-mono">{hh}:{mm}:{ss}</div>
         </div>
         <div className="text-center">
-          <p className="text-xs text-slate-300">Players joined</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Players</p>
           <div className="text-xl font-semibold text-white animate-number">{players}</div>
         </div>
         <div className="text-center">
-          <p className="text-xs text-slate-300">Spots left</p>
-          <div className="text-xl font-semibold text-amber-300 animate-number">{spots}</div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Spots left</p>
+          <div className="text-xl font-semibold text-amber-200 animate-number">{spots}</div>
         </div>
-        <button className="btn-neo px-6 py-3 bg-emerald-400 text-black font-semibold rounded-xl animate-pulse-slow shadow-lg shadow-emerald-500/40">
-          Join Now
+        <button className="md:col-span-5 btn-neo px-6 py-3 bg-gradient-to-r from-[#9a4dff] via-[#3ad3ff] to-[#37fff2] text-black font-semibold rounded-xl animate-pulse-slow shadow-purple">
+          Влететь в турнир
         </button>
       </div>
     </div>
