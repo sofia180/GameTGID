@@ -472,7 +472,20 @@ function App() {
               #{m.id} {m.game_type} ({m.status})
             </button>
           ))}
-          {!myActiveMatches.length && <span className="text-sm text-slate-500">No active matches yet</span>}
+          {!myActiveMatches.length && (
+            <div className="flex flex-col gap-2 text-sm text-slate-300 bg-slate-800/70 border border-slate-700 rounded-xl p-3 max-w-md">
+              <div className="text-white font-semibold">No matches yet</div>
+              <p>Create a casual room or join a tournament to see matches here.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button className="bg-emerald-400 text-black rounded-lg px-3 py-2 font-semibold" onClick={() => setTab('games')}>
+                  Explore games
+                </button>
+                <button className="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-2" onClick={() => setTab('tournaments')}>
+                  Go to tournaments
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         {currentMatch && currentMatch.game_type === 'chess' && (
           <div className="flex flex-col md:flex-row gap-4 items-start">
