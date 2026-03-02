@@ -349,6 +349,13 @@ function App() {
 
   const safeTournaments = Array.isArray(tournaments) ? tournaments : [];
   const safeGames = Array.isArray(games) ? games : [];
+  const profileSummary = {
+    rank: me ? 'Diamond' : 'Rookie',
+    earnings: me ? '$1,240' : '$0',
+    matches: myActiveMatches.length || 0,
+    winRate: myActiveMatches.length ? '68%' : '—',
+    referrals: 0
+  };
 
   return (
     <div className="min-h-screen p-4 space-y-4">
@@ -389,6 +396,25 @@ function App() {
       {tab === 'tournaments' && (
       <section className="grid gap-3 md:grid-cols-3">
         <div className="md:col-span-2 rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-neon panel">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200">Players online</p>
+              <p className="text-3xl font-[var(--font-display)] text-white">12,480</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200">Winnings today</p>
+              <p className="text-3xl font-[var(--font-display)] text-white">$58,200</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200">Active tournaments</p>
+              <p className="text-3xl font-[var(--font-display)] text-white">{safeTournaments.length || 18}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200">Biggest win</p>
+              <p className="text-3xl font-[var(--font-display)] text-white">$840</p>
+            </div>
+          </div>
+
           <HeroBlock />
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Tournaments</h2>
@@ -452,6 +478,27 @@ function App() {
           </div>
         </div>
       </section>
+      )}
+
+      {tab === 'tournaments' && (
+        <section className="grid gap-3 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <InvitePanel />
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-neon panel space-y-2">
+            <p className="text-xs uppercase tracking-[0.24em] text-cyan-200">Profile</p>
+            <p className="text-xl font-[var(--font-display)] text-white">{me?.username || 'Player'}</p>
+            <div className="grid grid-cols-2 gap-2 text-sm text-slate-200">
+              <div className="rounded-lg bg-white/5 px-3 py-2">Rank: <span className="text-white">{profileSummary.rank}</span></div>
+              <div className="rounded-lg bg-white/5 px-3 py-2">Earnings: <span className="text-white">{profileSummary.earnings}</span></div>
+              <div className="rounded-lg bg-white/5 px-3 py-2">Matches: <span className="text-white">{profileSummary.matches}</span></div>
+              <div className="rounded-lg bg-white/5 px-3 py-2">Win rate: <span className="text-white">{profileSummary.winRate}</span></div>
+            </div>
+            <div className="rounded-lg bg-white/5 px-3 py-2 text-sm text-slate-200">
+              Referrals: <span className="text-white">{profileSummary.referrals}</span>
+            </div>
+          </div>
+        </section>
       )}
 
       {tab === 'tournaments' && paymentInfo && (
