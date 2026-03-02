@@ -33,6 +33,10 @@ import InvitePanel from './components/InvitePanel';
 import BigWinToast from './components/BigWinToast';
 import PortalStats from './components/PortalStats';
 import GameSection from './components/GameSection';
+import { LocalGameShell } from './components/minigames/LocalGameShell';
+import { ReactionDuel } from './components/minigames/ReactionDuel';
+import { ArcadeScore } from './components/minigames/ArcadeScore';
+import { StrategySkirmish } from './components/minigames/StrategySkirmish';
 
 interface Tournament {
   id: number;
@@ -66,6 +70,7 @@ function App() {
   const [quickLoading, setQuickLoading] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
   const [hubFilter, setHubFilter] = useState<'all' | 'strategy' | 'reaction' | 'skill' | 'arcade' | 'duel'>('all');
+  const [localGame, setLocalGame] = useState<null | { id: string; title: string }>(null);
   const defaultGames = useMemo(
     () => [
       { id: 1, name: 'Blitz Chess', type: 'strategy', tags: ['featured', 'trending'], players_online: 342, prize_pool: 250, difficulty: 'Medium' },
@@ -597,6 +602,12 @@ function App() {
                     >
                       Tournaments
                     </button>
+                    <button
+                      className="flex-1 bg-white/5 text-slate-100 px-3 py-2 rounded-lg border border-white/10 hover:border-white/30"
+                      onClick={() => setLocalGame({ id: g.id, title: g.name })}
+                    >
+                      Demo
+                    </button>
                   </div>
                 </div>
               </div>
@@ -838,6 +849,22 @@ function App() {
           <InvitePanel />
           <GlobalActivity />
         </div>
+      )}
+
+      {localGame && (
+        <LocalGameShell
+          title={localGame.title}
+          durationSec={localGame.id === '2' ? 30 : 45}
+          onClose={() => setLocalGame(null)}
+          onFinish={() => setLocalGame(null)}
+        >
+          {localGame.id === '2' && <ReactionDuel onFinish={() => setLocalGame(null)} />}
+          {localGame.id === '4' && <ArcadeScore onFinish={() => setLocalGame(null)} />}
+          {localGame.id === '3' && <StrategySkirmish onFinish={() => setLocalGame(null)} />}
+          {!['2', '3', '4'].includes(String(localGame.id)) && (
+            <div className="text-sm text-slate-200">Demo coming soon for this game.</div>
+          )}
+        </LocalGameShell>
       )}
     </div>
   );
