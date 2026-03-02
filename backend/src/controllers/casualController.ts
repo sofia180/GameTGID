@@ -4,7 +4,7 @@ import { AuthedRequest } from '../middleware/telegramAuth.js';
 import { pool } from '../db/pool.js';
 
 async function getOrCreateCasualTournament() {
-  const title = 'Casual Chess';
+  const title = 'Casual Hub';
   const found = await pool.query('SELECT id FROM tournaments WHERE title=$1 LIMIT 1', [title]);
   if (found.rowCount) return found.rows[0].id as number;
   const created = await pool.query(
@@ -16,12 +16,13 @@ async function getOrCreateCasualTournament() {
 
 export async function createCasual(req: AuthedRequest, res: Response) {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+  const gameType = (req.body?.game_type || 'chess').toLowerCase();
   const tournamentId = await getOrCreateCasualTournament();
   const invite = randomUUID().slice(0, 6).toUpperCase();
   const { rows } = await pool.query(
     `INSERT INTO matches (tournament_id, player1, status, game_type, invite_code)
-     VALUES ($1,$2,'pending','chess',$3) RETURNING *`,
-    [tournamentId, req.user.id, invite]
+     VALUES ($1,$2,'pending',$4,$3) RETURNING *`,
+    [tournamentId, req.user.id, invite, gameType]
   );
   res.json({ code: invite, match: rows[0] });
 }

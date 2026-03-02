@@ -104,8 +104,8 @@ export async function move(matchId: number, body: { from: string; to: string; pr
   return data;
 }
 
-export async function createCasual() {
-  const { data } = await api.post('/casual/create');
+export async function createCasual(game_type?: string) {
+  const { data } = await api.post('/casual/create', { game_type });
   return data as { code: string; match: any };
 }
 

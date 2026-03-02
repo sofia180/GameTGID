@@ -186,6 +186,19 @@ function App() {
     }
   }
 
+  async function quickPlay(game: string) {
+    const gameType = game.toLowerCase().includes('chess') ? 'chess' : game.toLowerCase().includes('checkers') ? 'checkers' : game.toLowerCase().includes('battle') ? 'battleship' : 'chess';
+    try {
+      const { match } = await createCasual(gameType);
+      setTab('play');
+      await loadMyMatches();
+      await openMatch(match.id);
+    } catch (err) {
+      alert('Cannot start quick match');
+      console.error(err);
+    }
+  }
+
   function safeState(match: any) {
     if (!match?.state) return null;
     try {
@@ -551,7 +564,7 @@ function App() {
             ].map((g) => (
               <button
                 key={g.name}
-                onClick={() => !g.active && alert('Coming soon')}
+                onClick={() => g.active ? quickPlay(g.name) : alert('Coming soon')}
                 className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl`}
               >
                 <div className="text-lg font-semibold">{g.name}</div>
