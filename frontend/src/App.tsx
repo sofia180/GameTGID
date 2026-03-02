@@ -135,7 +135,7 @@ function App() {
 
   async function loadTournaments() {
     const list = await fetchTournaments();
-    setTournaments(list);
+    setTournaments(Array.isArray(list) ? list : []);
   }
 
   async function loadMyMatches() {
@@ -404,7 +404,7 @@ function App() {
             </div>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {tournaments.map((t) => (
+            {safeTournaments.map((t) => (
               <div key={t.id} className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 p-4 flex flex-col gap-2 shadow-purple">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#9a4dff]/14 via-[#3ad3ff]/12 to-[#37fff2]/14" />
                 <div className="flex items-center justify-between">
@@ -429,6 +429,11 @@ function App() {
                 </div>
               </div>
             ))}
+            {!safeTournaments.length && (
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                Туры недоступны в превью (нет API). В dev показывается заглушка.
+              </div>
+            )}
           </div>
         </div>
 
