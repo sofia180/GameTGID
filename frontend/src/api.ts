@@ -6,7 +6,7 @@ const api = axios.create({
 
 // Inject Telegram initData from WebApp
 export function setInitData(initData: string) {
-  api.defaults.headers.common['x-telegram-init-data'] = initData;
+  if (initData) api.defaults.headers.common['x-telegram-init-data'] = initData;
 }
 
 export async function fetchMe() {

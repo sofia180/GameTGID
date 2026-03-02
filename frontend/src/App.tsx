@@ -60,7 +60,12 @@ function App() {
   const [currentFen, setCurrentFen] = useState<string>('');
   const [tab, setTab] = useState<'play' | 'tournaments' | 'games' | 'admin'>('tournaments');
   const [bigWin, setBigWin] = useState<{ amount: number; user: string } | null>(null);
-  const initData = useMemo(() => WebApp.initData || '', []);
+  const initData = useMemo(() => {
+    const raw = WebApp.initData || '';
+    if (raw) return raw;
+    if (import.meta.env.VITE_ALLOW_INSECURE_DEV === 'true') return 'insecure-dev';
+    return '';
+  }, []);
   const wallet = useTonWallet();
   const tonAddress = useTonAddress();
 
@@ -90,7 +95,7 @@ function App() {
         await loadTournaments();
         await loadMyMatches();
       } catch (err) {
-        console.error(err);
+        console.warn('auth/me failed (possibly dev mode). Continuing with UI.', err);
       }
     })();
   }, [initData]);
@@ -129,7 +134,8 @@ function App() {
         await openMatch(matches[0].id);
       }
     } catch (err) {
-      console.error(err);
+      console.warn('loadMyMatches failed, showing empty list', err);
+      setMyActiveMatches([]);
     }
   }
 
