@@ -60,6 +60,7 @@ function App() {
   const [currentFen, setCurrentFen] = useState<string>('');
   const [tab, setTab] = useState<'play' | 'tournaments' | 'games' | 'admin'>('tournaments');
   const [bigWin, setBigWin] = useState<{ amount: number; user: string } | null>(null);
+  const [quickLoading, setQuickLoading] = useState(false);
   const initData = useMemo(() => {
     const raw = WebApp.initData || '';
     if (raw) return raw;
@@ -188,14 +189,17 @@ function App() {
 
   async function quickPlay(game: string) {
     const gameType = game.toLowerCase().includes('chess') ? 'chess' : game.toLowerCase().includes('checkers') ? 'checkers' : game.toLowerCase().includes('battle') ? 'battleship' : 'chess';
+    setQuickLoading(true);
     try {
       const { match } = await createCasual(gameType);
       setTab('play');
       await loadMyMatches();
       await openMatch(match.id);
     } catch (err) {
-      alert('Cannot start quick match');
+      alert('Cannot start quick match. Please reconnect Telegram WebApp or reload.');
       console.error(err);
+    } finally {
+      setQuickLoading(false);
     }
   }
 
@@ -556,8 +560,8 @@ function App() {
           <div className="grid gap-3 md:grid-cols-3">
             {[
               { name: 'Chess', status: 'Live', color: 'from-emerald-400 to-cyan-500', active: true },
-              { name: 'Checkers', status: 'Coming soon', color: 'from-indigo-400 to-purple-500', active: false },
-              { name: 'Battleship', status: 'Coming soon', color: 'from-blue-400 to-sky-500', active: false },
+              { name: 'Checkers', status: 'Live', color: 'from-indigo-400 to-purple-500', active: true },
+              { name: 'Battleship', status: 'Live', color: 'from-blue-400 to-sky-500', active: true },
               { name: 'Arcade Blitz', status: 'Coming soon', color: 'from-amber-400 to-pink-500', active: false },
               { name: 'Dota 2 Clash', status: 'Coming soon', color: 'from-rose-400 to-orange-500', active: false },
               { name: 'CS:GO Aim', status: 'Coming soon', color: 'from-sky-400 to-blue-600', active: false },
@@ -565,11 +569,16 @@ function App() {
               <button
                 key={g.name}
                 onClick={() => g.active ? quickPlay(g.name) : alert('Coming soon')}
-                className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl`}
+                disabled={quickLoading && g.active}
+                className={`rounded-xl border border-slate-800 bg-gradient-to-r ${g.color} p-3 text-left text-white shadow-lg shadow-slate-900/30 transition transform hover:translate-y-[-2px] hover:shadow-2xl disabled:opacity-60`}
               >
                 <div className="text-lg font-semibold">{g.name}</div>
                 <div className={`text-xs ${g.active ? 'text-emerald-100' : 'text-slate-100/80'}`}>{g.status}</div>
-                {g.active && <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">Play now</div>}
+                {g.active && (
+                  <div className="mt-2 inline-flex items-center gap-1 text-xs text-black bg-white/80 px-2 py-1 rounded">
+                    {quickLoading ? 'Starting…' : 'Play now'}
+                  </div>
+                )}
               </button>
             ))}
           </div>
